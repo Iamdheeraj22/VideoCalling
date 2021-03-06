@@ -1,5 +1,6 @@
 package com.example.videocalling;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -65,8 +67,24 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this,NotificationActivity.class));
                 return true;
             }else if(itemId == R.id.Logout){
-                FirebaseAuth.getInstance().signOut();
-                startActivity(new Intent(MainActivity.this,LoginActivity.class));
+                AlertDialog.Builder alertDialog=new AlertDialog.Builder(this);
+                alertDialog.setMessage("Do you want to logout your account?")
+                        .setCancelable(false)
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                FirebaseAuth.getInstance().signOut();
+                                startActivity(new Intent(MainActivity.this,LoginActivity.class));
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                //  Action for 'NO' Button
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog alert = alertDialog.create();
+                alert.setTitle("Account Logout!");
+                alert.show();
                 return true;
             }else if(itemId == R.id.home){
                 startActivity(new Intent(MainActivity.this,MainActivity.class));

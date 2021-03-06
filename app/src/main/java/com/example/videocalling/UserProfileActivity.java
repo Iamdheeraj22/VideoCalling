@@ -43,9 +43,17 @@ public class UserProfileActivity extends AppCompatActivity {
         Picasso.get().load(receiverUserImage).into(imageView);
         textView.setText(receiverUserName);
 
-
+        checkUser();
         manageButtonClickEvent();
     }
+
+    private void checkUser()
+    {
+        if(senderUserId.equals(receiverUserId)) {
+            btn1.setVisibility(View.GONE);
+        }
+    }
+
     //Initialize the all widget
     private void initViews()
     {

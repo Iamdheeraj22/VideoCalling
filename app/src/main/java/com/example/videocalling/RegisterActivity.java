@@ -1,5 +1,6 @@
 package com.example.videocalling;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -22,7 +23,7 @@ public class RegisterActivity extends AppCompatActivity {
     EditText uname, email1, createpassword, confirmpassword;
     FirebaseAuth firebaseAuth;
     DatabaseReference databaseReference;
-
+    ProgressDialog progressDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,6 +32,7 @@ public class RegisterActivity extends AppCompatActivity {
         btn3 = findViewById(R.id.btn3);
         uname = findViewById(R.id.uname);
         email1 = findViewById(R.id.email1);
+        progressDialog=new ProgressDialog(this);
         createpassword = findViewById(R.id.createpassword);
         confirmpassword = findViewById(R.id.confirmpassword);
         firebaseAuth = FirebaseAuth.getInstance();
@@ -51,6 +53,8 @@ public class RegisterActivity extends AppCompatActivity {
                 Toast.makeText(RegisterActivity.this, "Password doesn't match!", Toast.LENGTH_SHORT).show();
             } else {
                 RegisterUser(txt_username, txt_email, confirm_password);
+                progressDialog.setMessage("Creating the new account ,Please wait few moments");
+                progressDialog.show();
             }
         });
     }
@@ -74,15 +78,18 @@ public class RegisterActivity extends AppCompatActivity {
                     if (task1.isSuccessful()) {
                         firebaseAuth.getCurrentUser().sendEmailVerification().addOnCompleteListener(task11 -> {
                             if (task11.isSuccessful()) {
+                                progressDialog.dismiss();
                                 Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
                                 startActivity(intent);
                             } else {
+                                progressDialog.dismiss();
                                 Toast.makeText(RegisterActivity.this, task11.getException().getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         });
                     }
                 });
             } else {
+                progressDialog.dismiss();
                 Toast.makeText(RegisterActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
             }
         });

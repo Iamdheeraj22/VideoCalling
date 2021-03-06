@@ -183,7 +183,7 @@ public class ProfileActivity extends AppCompatActivity {
                         {
                             String image=snapshot.child("imageurl").getValue().toString();
                             String name=snapshot.child("username").getValue().toString();
-                            String bio=snapshot.child("about").getValue().toString();
+                            String bio=snapshot.child("bio").getValue().toString();
 
                             edit_name.setText(name);
                             edit_bio.setText(bio);

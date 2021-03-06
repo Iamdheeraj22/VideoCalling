@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -25,6 +26,7 @@ public class LoginActivity extends AppCompatActivity {
     TextView forget_password;
     EditText email2,password2;
     FirebaseAuth firebaseAuth;
+    ProgressDialog progressDialog;
 
     @Override
     protected void onStart() {
@@ -52,6 +54,8 @@ public class LoginActivity extends AppCompatActivity {
         password2=findViewById(R.id.password2);
         forget_password=findViewById(R.id.forget);
         firebaseAuth= FirebaseAuth.getInstance();
+        progressDialog=new ProgressDialog(this);
+        progressDialog.setMessage("Please wait few moments...");
         btn5=findViewById(R.id.btn5);
         btn6=findViewById(R.id.btn6);
         btn6.setOnClickListener(new View.OnClickListener() {
@@ -79,6 +83,7 @@ public class LoginActivity extends AppCompatActivity {
         btn4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                progressDialog.show();
                 String txt_email=email2.getText().toString();
                 String txt_password=password2.getText().toString();
                 if(TextUtils.isEmpty(txt_email) || TextUtils.isEmpty(txt_password)){
@@ -92,14 +97,17 @@ public class LoginActivity extends AppCompatActivity {
                             {
                                 if(firebaseAuth.getCurrentUser().isEmailVerified())
                                 {
+                                    progressDialog.dismiss();
                                     Intent intent=new Intent(LoginActivity.this,MainActivity.class);
                                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                                     startActivity(intent);
                                 }else {
+                                    progressDialog.dismiss();
                                     Toast.makeText(LoginActivity.this,"Please verify emailAddress",Toast.LENGTH_SHORT).show();
                                 }
                             }else
                             {
+                                progressDialog.dismiss();
                                 Toast.makeText(LoginActivity.this,task.getException().getMessage(),Toast.LENGTH_SHORT).show();
                             }
                         }
