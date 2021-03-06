@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:id="@+id/app_bar_layout_contacts"
+        android:background="@color/colorAccent"
+        android:layout_height="wrap_content">
+         <androidx.appcompat.widget.Toolbar
+                android:layout_width="match_parent"
+                android:id="@+id/toolbar_mainActivity"
+                android:layout_height="60dp">
+             <RelativeLayout
+                 android:layout_width="match_parent"
+                 android:layout_height="match_parent">
+                 <TextView
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:textSize="25sp"
+                     android:text="Video Calling"
+                     tools:ignore="HardcodedText"
+                     android:layout_marginTop="13sp"/>
+                 <ImageView
+                     android:layout_width="38dp"
+                     android:layout_height="40dp"
+                     android:layout_alignParentEnd="true"
+                     android:layout_marginEnd="15dp"
+                     android:id="@+id/image_contacts_btn"
+                     android:layout_marginTop="10dp"
+                     android:contentDescription="Contacts Image"
+                     tools:ignore="HardcodedText"
+                     android:src="@drawable/person"/>
+             </RelativeLayout>
+         </androidx.appcompat.widget.Toolbar>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/contacts_list"
+        android:layout_below="@id/app_bar_layout_contacts"
+        android:layout_above="@+id/nav_view">
+
+    </androidx.recyclerview.widget.RecyclerView>
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="?android:attr/windowBackground"
+        app:menu="@menu/bottom_nav_menu" />
+
+</RelativeLayout>
