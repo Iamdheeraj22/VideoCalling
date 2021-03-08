@@ -70,7 +70,7 @@ public class RegisterActivity extends AppCompatActivity {
                 hashMap.put("username", username);
                 hashMap.put("email", email);
                 hashMap.put("imageurl", "default");
-                //hashMap.put("status", "Offline");
+                hashMap.put("status", "Offline");
                 hashMap.put("bio", "Available");
                 //hashMap.put("search", username.toUpperCase());
 

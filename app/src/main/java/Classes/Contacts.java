@@ -2,7 +2,10 @@ package Classes;
 
 public class Contacts
 {
-    private String username,imageurl,about,id;
+    private String username;
+    private String imageurl;
+    private String about;
+    private String id;
 
     public Contacts() {
     }

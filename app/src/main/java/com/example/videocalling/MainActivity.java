@@ -22,6 +22,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.videocalling.databinding.ActivityMainBinding;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -32,6 +35,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import Classes.Contacts;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     DatabaseReference contactsRef,userRef;
     FirebaseAuth mAuth;
     String currentUserId;
-    String userName="",imageUrl="";
+    String userName="",imageUrl="",status="";
     String callBy="";
 
     @Override
@@ -106,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        setOnlineAndOfflineStatus();
         checkForReceivingCall();
         validateUser();
         FirebaseRecyclerOptions<Contacts> firebaseRecyclerOptions=
@@ -128,9 +133,20 @@ public class MainActivity extends AppCompatActivity {
                                 {
                                     userName=snapshot.child("username").getValue().toString();
                                     imageUrl=snapshot.child("imageurl").getValue().toString();
-
+                                    status=snapshot.child("status").getValue().toString();
                                     contactsViewHolder.contacts_username.setText(userName);
                                     Picasso.get().load(imageUrl).into(contactsViewHolder.contacts_image);
+
+                                   if(status.equals("Online")){
+                                        contactsViewHolder.status_on.setVisibility(View.VISIBLE);
+                                        contactsViewHolder.status_off.setVisibility(View.GONE);
+                                    }else if (status.equals("Offline")){
+                                        contactsViewHolder.status_off.setVisibility(View.VISIBLE);
+                                        contactsViewHolder.status_on.setVisibility(View.GONE);
+                                    }else{
+                                       contactsViewHolder.status_off.setVisibility(View.VISIBLE);
+                                       contactsViewHolder.status_on.setVisibility(View.GONE);
+                                   }
                                 }
                                 contactsViewHolder.calling_btn.setOnClickListener(new View.OnClickListener()
                                 {
@@ -160,6 +176,24 @@ public class MainActivity extends AppCompatActivity {
         myContactsList.setAdapter(firebaseRecyclerAdapter);
         firebaseRecyclerAdapter.startListening();
     }
+    private void setOnlineAndOfflineStatus(){
+        userRef.child(currentUserId).child("status").setValue("Online")
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if(task.isComplete())
+                        {
+                            Toast.makeText(MainActivity.this, "You are online...", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     //Set the RecyclerView
     public static class ContactsViewHolder extends RecyclerView.ViewHolder
     {
@@ -167,6 +201,7 @@ public class MainActivity extends AppCompatActivity {
         TextView contacts_username;
         ImageButton calling_btn;
         RelativeLayout relativeLayout;
+        CircleImageView status_on,status_off;
         public ContactsViewHolder(@NonNull View itemView)
         {
             super(itemView);
@@ -174,6 +209,8 @@ public class MainActivity extends AppCompatActivity {
             contacts_username=itemView.findViewById(R.id.contacts_username);
             relativeLayout=itemView.findViewById(R.id.contacts_cardView);
             calling_btn=itemView.findViewById(R.id.calling_btn);
+            status_on=itemView.findViewById(R.id.status_on);
+            status_off=itemView.findViewById(R.id.status_off);
         }
     }
     //Check the receiving Call
@@ -191,10 +228,9 @@ public class MainActivity extends AppCompatActivity {
                             intent.putExtra("visit_user_id",callBy);
                             startActivity(intent);
                         }
-                    }
-                    @Override
+                    }@Override
                     public void onCancelled(@NonNull DatabaseError error) {
-
+                        Toast.makeText(MainActivity.this, error.toException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -202,19 +238,34 @@ public class MainActivity extends AppCompatActivity {
         DatabaseReference reference=FirebaseDatabase.getInstance().getReference();
         reference.child("Users").child(currentUserId).addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot)
-            {
-                if(!snapshot.exists())
-                {
+            public void onDataChange(@NonNull DataSnapshot snapshot){
+                if(!snapshot.exists()){
                     Intent settingIntent=new Intent(MainActivity.this,ProfileActivity.class);
                     startActivity(settingIntent);
                     finish();
                 }
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                Toast.makeText(MainActivity.this, error.toException().getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+   @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        userRef.child(currentUserId).child("status").setValue("Offline")
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if(task.isComplete()){
+                            Toast.makeText(MainActivity.this, "Thank you...", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

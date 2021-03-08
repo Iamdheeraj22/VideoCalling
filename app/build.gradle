@@ -40,7 +40,7 @@ dependencies {
 
     implementation 'com.google.firebase:firebase-database:19.6.0'
     implementation 'com.googlecode.libphonenumber:libphonenumber:8.9.7'
-    implementation 'com.google.firebase:firebase-auth:20.0.2'
+    implementation 'com.google.firebase:firebase-auth:20.0.3'
     implementation 'androidx.navigation:navigation-fragment:2.3.3'
     implementation 'androidx.navigation:navigation-ui:2.3.3'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.3.0'
@@ -49,6 +49,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-core:18.0.2'
 
     implementation 'pub.devrel:easypermissions:3.0.0'
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.firebaseui:firebase-ui-database:6.2.1'
     implementation 'com.opentok.android:opentok-android-sdk:2.15.3'
