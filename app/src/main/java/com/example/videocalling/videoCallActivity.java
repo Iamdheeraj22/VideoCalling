@@ -4,10 +4,12 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -31,20 +33,24 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 public class videoCallActivity extends AppCompatActivity implements Session.SessionListener, PublisherKit.PublisherListener
 {
-    private static String API_key="47147804";
-    private static String SESSION_ID="2_MX40NzE0NzgwNH5-MTYxNDg1NjA1MzQwNH5HeGhLWnlyM2srQWZDUVhVTkRvcXRHUmp-fg";
-    private static String TOKEN="T1==cGFydG5lcl9pZD00NzE0NzgwNCZzaWc9NmUwMTM5N2NjMGE4Y2RmZTdlMTVhYzE4NzJjY2Q4OGFkMTJlNDc4MTpzZXNzaW9uX2lkPTJfTVg0ME56RTBOemd3Tkg1LU1UWXhORGcxTmpBMU16UXdOSDVIZUdoTFdubHlNMnNyUVdaRFVWaFZUa1J2Y1hSSFVtcC1mZyZjcmVhdGVfdGltZT0xNjE0ODU2MTI5Jm5vbmNlPTAuNDY5ODEzNTI0MzQxNTY2NjUmcm9sZT1wdWJsaXNoZXImZXhwaXJlX3RpbWU9MTYxNzQ0NDUyNyZpbml0aWFsX2xheW91dF9jbGFzc19saXN0PQ==";
+    private final static String API_key="47147804";
+    private final static String SESSION_ID="2_MX40NzE0NzgwNH5-MTYxNDg1NjA1MzQwNH5HeGhLWnlyM2srQWZDUVhVTkRvcXRHUmp-fg";
+    private final static String TOKEN="T1==cGFydG5lcl9pZD00NzE0NzgwNCZzaWc9NmUwMTM5N2NjMGE4Y2RmZTdlMTVhYzE4NzJjY2Q4OGFkMTJlNDc4MTpzZXNzaW9uX2lkPTJfTVg0ME56RTBOemd3Tkg1LU1UWXhORGcxTmpBMU16UXdOSDVIZUdoTFdubHlNMnNyUVdaRFVWaFZUa1J2Y1hSSFVtcC1mZyZjcmVhdGVfdGltZT0xNjE0ODU2MTI5Jm5vbmNlPTAuNDY5ODEzNTI0MzQxNTY2NjUmcm9sZT1wdWJsaXNoZXImZXhwaXJlX3RpbWU9MTYxNzQ0NDUyNyZpbml0aWFsX2xheW91dF9jbGFzc19saXN0PQ==";
     private static final String LOG_TAG=videoCallActivity.class.getSimpleName();
     private static final int RC_VIDEO_APP_PERMISSION=124;
     DatabaseReference usersRef;
     ImageView endVideoCall;
     String UserId="";
-
+    //Drag and drop parameter
+    float xd,yd;
+    float xm,ym;
+    float xDesc,yDesc;
     Session mSession;
     Publisher mPublisher;
     Subscriber mSubscriber;
 
     FrameLayout mPublisherController,mSubscriberController;
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,46 +58,65 @@ public class videoCallActivity extends AppCompatActivity implements Session.Sess
         initVIew();
         UserId= FirebaseAuth.getInstance().getCurrentUser().getUid();
         usersRef= FirebaseDatabase.getInstance().getReference().child("Users");
-        endVideoCall.setOnClickListener(new View.OnClickListener() {
+        endVideoCall.setOnClickListener(v -> usersRef.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onClick(View v) {
-                usersRef.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot)
-                    {
-                        if(snapshot.child(UserId).hasChild("Ringing"))
-                        {
-                            usersRef.child(UserId).child("Ringing").removeValue();
-                            if(mPublisher!=null){
-                                mPublisher.destroy();
-                            }
-                            if(mSubscriber!=null){
-                                mSubscriber.destroy();
-                            }
-                            startActivity(new Intent(videoCallActivity.this,StartActivity.class));
-                            finish();
-                        }
-                        if(snapshot.child(UserId).hasChild("Calling"))
-                        {
-                            usersRef.child(UserId).child("Calling").removeValue();
-                            startActivity(new Intent(videoCallActivity.this,StartActivity.class));
-                            finish();
-                        }else {
-                            if(mPublisher!=null){
-                                mPublisher.destroy();
-                            }
-                            if(mSubscriber!=null){
-                                mSubscriber.destroy();
-                            }
-                            startActivity(new Intent(videoCallActivity.this,StartActivity.class));
-                            finish();
-                        }
+            public void onDataChange(@NonNull DataSnapshot snapshot)
+            {
+                if(snapshot.child(UserId).hasChild("Ringing"))
+                {
+                    usersRef.child(UserId).child("Ringing").removeValue();
+                    if(mPublisher!=null){
+                        mPublisher.destroy();
                     }
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Toast.makeText(videoCallActivity.this,error.toException().getMessage(),Toast.LENGTH_SHORT).show();
+                    if(mSubscriber!=null){
+                        mSubscriber.destroy();
                     }
-                });
+                    startActivity(new Intent(videoCallActivity.this,StartActivity.class));
+                    finish();
+                }
+                if(snapshot.child(UserId).hasChild("Calling"))
+                {
+                    usersRef.child(UserId).child("Calling").removeValue();
+                    startActivity(new Intent(videoCallActivity.this,StartActivity.class));
+                    finish();
+                }else {
+                    if(mPublisher!=null){
+                        mPublisher.destroy();
+                    }
+                    if(mSubscriber!=null){
+                        mSubscriber.destroy();
+                    }
+                    startActivity(new Intent(videoCallActivity.this,StartActivity.class));
+                    finish();
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(videoCallActivity.this,error.toException().getMessage(),Toast.LENGTH_SHORT).show();
+            }
+        }));
+        // Drag and Drop
+        mPublisherController.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event)
+            {
+                int e=event.getActionMasked();
+                switch (e)
+                {
+                    case MotionEvent.ACTION_DOWN:
+                        xd= event.getX();
+                        yd= event.getY();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        xm=event.getX();
+                        ym=event.getY();
+                        xDesc=xm-xd;
+                        yDesc=ym-yd;
+                        mPublisherController.setX(mPublisherController.getX()+xDesc);
+                        mPublisherController.setY(mPublisherController.getY()+yDesc);
+                        break;
+                }
+                return true;
             }
         });
         requestPermissions();
@@ -99,6 +124,8 @@ public class videoCallActivity extends AppCompatActivity implements Session.Sess
 
     private void initVIew() {
         endVideoCall=findViewById(R.id.close_video_call_btn);
+        mPublisherController=findViewById(R.id.publisher_container);
+        mSubscriberController=findViewById(R.id.subscriber_container);
     }
 
     @Override
@@ -113,9 +140,6 @@ public class videoCallActivity extends AppCompatActivity implements Session.Sess
         String[] perms={Manifest.permission.INTERNET,Manifest.permission.RECORD_AUDIO,Manifest.permission.CAMERA};
         if(EasyPermissions.hasPermissions(this ,perms))
         {
-            mPublisherController=findViewById(R.id.publisher_container);
-            mSubscriberController=findViewById(R.id.subscriber_container);
-
             mSession=new Session.Builder(this,API_key,SESSION_ID).build();
             mSession.setSessionListener(videoCallActivity.this);
             mSession.connect(TOKEN);
