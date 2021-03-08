@@ -153,9 +153,42 @@ public class MainActivity extends AppCompatActivity {
                                     @Override
                                     public void onClick(View v)
                                     {
-                                        Intent intent=new Intent(MainActivity.this,calling_activity.class);
-                                        intent.putExtra("visit_user_id",listUserId);
-                                        startActivity(intent);
+                                        userRef.child(listUserId).addValueEventListener(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot snapshot)
+                                            {
+                                                if(snapshot.exists())
+                                                {
+                                                    status=snapshot.child("status").getValue().toString();
+
+                                                    if(status.equals("Online"))
+                                                    {
+                                                        Intent intent=new Intent(MainActivity.this,calling_activity.class);
+                                                        intent.putExtra("visit_user_id",listUserId);
+                                                        startActivity(intent);
+                                                    }
+                                                    if(status.equals("Offline"))
+                                                    {
+                                                        AlertDialog.Builder alertDialog=new AlertDialog.Builder(MainActivity.this);
+                                                        alertDialog.setMessage("User currently offline")
+                                                                .setCancelable(false)
+                                                                .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                                                                    public void onClick(DialogInterface dialog, int id) {
+                                                                        Toast.makeText(MainActivity.this, "Try after some time...", Toast.LENGTH_SHORT).show();
+                                                                    }
+                                                                });
+                                                        AlertDialog alert = alertDialog.create();
+                                                        alert.setTitle("Alert!");
+                                                        alert.show();
+                                                    }
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                            }
+                                        });
                                     }
                                 });
                             }

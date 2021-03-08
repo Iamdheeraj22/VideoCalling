@@ -124,8 +124,6 @@ public class calling_activity extends AppCompatActivity
                 }
                 if(snapshot.child(receiverUserId).child("Ringing").hasChild("picked"))
                 {
-
-
                     Intent intent=new Intent(calling_activity.this,videoCallActivity.class);
                     startActivity(intent);
                 }
@@ -209,7 +207,7 @@ public class calling_activity extends AppCompatActivity
                                                                                                        public void onComplete(@NonNull Task<Void> task)
                                                                                                        {
                                                                                                            if(task.isSuccessful()){
-                                                                                                               startActivity(new Intent(calling_activity.this,StartActivity.class));
+                                                                                                               startActivity(new Intent(calling_activity.this,MainActivity.class));
                                                                                                                finish();
                                                                                                            }}
                                                                                                    });
@@ -217,7 +215,7 @@ public class calling_activity extends AppCompatActivity
                                                                                    }
                                                                                });
                                                                            }else {
-                                                                               startActivity(new Intent(calling_activity.this,StartActivity.class));
+                                                                               startActivity(new Intent(calling_activity.this,MainActivity.class));
                                                                                finish();
                                                                            }
                                                                        }
@@ -225,7 +223,7 @@ public class calling_activity extends AppCompatActivity
                                                                        public void onCancelled(@NonNull DatabaseError error) {
                                                                        }
                                                                    });
-                                                           startActivity(new Intent(calling_activity.this, StartActivity.class));
+                                                           startActivity(new Intent(calling_activity.this, MainActivity.class));
                                                            finish();
                                                        }
                                                    }
@@ -234,7 +232,7 @@ public class calling_activity extends AppCompatActivity
                                 }
                             });
                         }else {
-                            startActivity(new Intent(calling_activity.this,StartActivity.class));
+                            startActivity(new Intent(calling_activity.this,MainActivity.class));
                             finish();
                         }
                     }
