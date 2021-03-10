@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,6 +16,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -41,6 +43,8 @@ public class videoCallActivity extends AppCompatActivity implements Session.Sess
     DatabaseReference usersRef;
     ImageView endVideoCall;
     String UserId="";
+    FloatingActionButton rotation;
+    Boolean isRotate;
     //Drag and drop parameter
     float xd,yd;
     float xm,ym;
@@ -50,7 +54,7 @@ public class videoCallActivity extends AppCompatActivity implements Session.Sess
     Subscriber mSubscriber;
 
     FrameLayout mPublisherController,mSubscriberController;
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint({"ClickableViewAccessibility", "SourceLockedOrientationActivity"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,6 +123,15 @@ public class videoCallActivity extends AppCompatActivity implements Session.Sess
                 return true;
             }
         });
+        rotation.setOnClickListener(v -> {
+            if(!isRotate){
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                isRotate=true;
+            }else {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                isRotate=false;
+            }
+        });
         requestPermissions();
     }
 
@@ -126,6 +139,8 @@ public class videoCallActivity extends AppCompatActivity implements Session.Sess
         endVideoCall=findViewById(R.id.close_video_call_btn);
         mPublisherController=findViewById(R.id.publisher_container);
         mSubscriberController=findViewById(R.id.subscriber_container);
+        rotation=findViewById(R.id.screen_rotate);
+        isRotate=false;
     }
 
     @Override
