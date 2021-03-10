@@ -3,10 +3,12 @@ package com.example.videocalling;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -22,10 +24,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.videocalling.databinding.ActivityMainBinding;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -48,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
     String currentUserId;
     String userName="",imageUrl="",status="";
     String callBy="";
+    FloatingActionButton featuresBtn,exitBtn,restartBtn;
+    Boolean isAllFloatingButtonVisible;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        initViews();
         navView = findViewById(R.id.nav_view);
         navView.setSelectedItemId(R.id.setting);
 
@@ -105,8 +108,32 @@ public class MainActivity extends AppCompatActivity {
             startActivity(find);
         });
 
+        //Display the features Button with animation
+        featuresBtn.setOnClickListener(v -> {
+            Animation animation1 = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fade);
+            if (!isAllFloatingButtonVisible) {
+                restartBtn.show();
+                restartBtn.startAnimation(animation1);
+                exitBtn.show();
+                exitBtn.startAnimation(animation1);
+                isAllFloatingButtonVisible = true;
+                featuresBtn.setImageResource(R.drawable.minimize);
+            } else {
+                restartBtn.hide();
+                exitBtn.hide();
+                isAllFloatingButtonVisible = false;
+                featuresBtn.setImageResource(R.drawable.maximize);
+            }
+        });
+        //Restart the app
+        restartBtn.setOnClickListener(v -> {
+            restart();
+        });
+        //Exit the app
+        exitBtn.setOnClickListener(v -> {
+            exit();
+        });
     }
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -183,10 +210,8 @@ public class MainActivity extends AppCompatActivity {
                                                     }
                                                 }
                                             }
-
                                             @Override
                                             public void onCancelled(@NonNull DatabaseError error) {
-
                                             }
                                         });
                                     }
@@ -211,20 +236,12 @@ public class MainActivity extends AppCompatActivity {
     }
     private void setOnlineAndOfflineStatus(){
         userRef.child(currentUserId).child("status").setValue("Online")
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if(task.isComplete())
-                        {
-                            Toast.makeText(MainActivity.this, "You are online...", Toast.LENGTH_SHORT).show();
-                        }
+                .addOnCompleteListener(task -> {
+                    if(task.isComplete())
+                    {
+                        Toast.makeText(MainActivity.this, "You are online...", Toast.LENGTH_SHORT).show();
                     }
-                }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+                }).addOnFailureListener(e -> Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     //Set the RecyclerView
@@ -288,18 +305,33 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         userRef.child(currentUserId).child("status").setValue("Offline")
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if(task.isComplete()){
-                            Toast.makeText(MainActivity.this, "Thank you...", Toast.LENGTH_SHORT).show();
-                        }
+                .addOnCompleteListener(task -> {
+                    if(task.isComplete()){
+                        Toast.makeText(MainActivity.this, "Thank you...", Toast.LENGTH_SHORT).show();
                     }
-                }).addOnFailureListener(new OnFailureListener() {
+                }).addOnFailureListener(e -> Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+    private void exit() {
+        finish();
+    }
+    private void restart()
+    {
+        finish();
+        Handler handler=new Handler();
+        handler.postDelayed(new Runnable() {
             @Override
-            public void onFailure(@NonNull Exception e) {
-                Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            public void run() {
+                startActivity(getIntent());
             }
-        });
+        },1000);
+    }
+    private void initViews()
+    {
+        featuresBtn=findViewById(R.id.features_app);
+        restartBtn=findViewById(R.id.restart_app);
+        exitBtn=findViewById(R.id.exit_app);
+        isAllFloatingButtonVisible=false;
+        restartBtn.hide();
+        exitBtn.hide();
     }
 }
