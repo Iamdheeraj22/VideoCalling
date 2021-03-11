@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".ProfileActivity">
 
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/imageview1"
         android:layout_width="250dp"
         android:layout_height="200dp"
@@ -15,41 +15,44 @@
         android:src="@mipmap/ic_launcher"
         tools:ignore="ContentDescription" />
 
-    <EditText
-        android:id="@+id/edit_name"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/text_name"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="50dp"
         android:layout_marginEnd="50dp"
         android:layout_below="@id/imageview1"
+        android:textStyle="bold"
+        android:textSize="30sp"
         android:hint="Name"
         android:layout_marginTop="30dp"
         android:importantForAutofill="no"
-        android:inputType="text"
         tools:ignore="HardcodedText" />
 
-    <EditText
-        android:id="@+id/edit_bio"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/text_bio"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="50dp"
+        android:text="Available"
+        android:textSize="25sp"
+        android:textStyle="italic"
         android:layout_marginEnd="50dp"
-        android:layout_below="@id/edit_name"
+        android:layout_below="@id/text_name"
         android:layout_marginTop="30dp"
-        android:hint="Write a bio!"
         android:importantForAutofill="no"
-        android:inputType="text"
         tools:ignore="HardcodedText" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:id="@+id/info_submit"
-        android:layout_below="@id/edit_bio"
+        android:layout_below="@id/text_bio"
         android:layout_marginStart="150dp"
         android:layout_marginEnd="50dp"
         android:layout_marginTop="30dp"
-        android:text="Update"
+        android:textAllCaps="false"
+        android:text="Update Bio"
         tools:ignore="HardcodedText" />
 
 </RelativeLayout>
