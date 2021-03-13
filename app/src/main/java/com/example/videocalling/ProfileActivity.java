@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -43,8 +42,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    TextView text_name,text_bio;
-    Button update_bio;
+    TextView text_name,text_bio,full_name;
     CircleImageView imageView1;
     private StorageTask uploadTask;
     private static final int IMAGE_REQUEST=1;
@@ -61,16 +59,12 @@ public class ProfileActivity extends AppCompatActivity {
         text_bio=findViewById(R.id.text_bio);
         text_name=findViewById(R.id.text_name);
         imageView1=findViewById(R.id.imageview1);
-        update_bio=findViewById(R.id.info_submit);
+        full_name=findViewById(R.id.name);
         progressDialog=new ProgressDialog(this);
         databaseReference= FirebaseDatabase.getInstance().getReference().child("Users");
         UserProfileRef= FirebaseStorage.getInstance().getReference().child("Profile Images");
         currentUser=FirebaseAuth.getInstance().getCurrentUser().getUid();
         imageView1.setOnClickListener(v -> {
-           /* Intent galleryIntent=new Intent();
-            galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
-            galleryIntent.setType("image/*");
-            startActivityForResult(galleryIntent,galleryPick);*/
 
             PopupMenu popupMenu=new PopupMenu(ProfileActivity.this,imageView1);
             popupMenu.getMenuInflater().inflate(R.menu.profile_change,popupMenu.getMenu());
@@ -99,31 +93,31 @@ public class ProfileActivity extends AppCompatActivity {
             });
             popupMenu.show();
         });
-        update_bio.setOnClickListener(v -> {
+        text_bio.setOnClickListener(v -> {
             changeYourBio();
+        });
+        full_name.setOnClickListener(v -> {
+            changeYourName();
         });
         RetrieveUserData();
     }
 
-    private void changeYourBio()
+    // Change Your Name
+    private void changeYourName()
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Write your bio!");
-        final View customLayout = getLayoutInflater().inflate(R.layout.about_change, null);
+        final View customLayout = getLayoutInflater().inflate(R.layout.name_change, null);
         builder.setView(customLayout);
 
         builder.setPositiveButton("Update", (dialog, which) -> {
-            String bio;
-            EditText editText = customLayout.findViewById(R.id.editText);
-            bio=editText.getText().toString();
-            databaseReference.child(currentUser).child("about").setValue(bio)
-                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if(task.isComplete()){
-                                text_bio.setText(bio);
-                                Toast.makeText(ProfileActivity.this, "Bio updated...", Toast.LENGTH_SHORT).show();
-                            }
+            String name;
+            EditText editText = customLayout.findViewById(R.id.editText_name);
+            name=editText.getText().toString();
+            databaseReference.child(currentUser).child("fullname").setValue(name)
+                    .addOnCompleteListener(task -> {
+                        if(task.isComplete()){
+                            full_name.setText(name);
+                            Toast.makeText(ProfileActivity.this, "Name updated...", Toast.LENGTH_SHORT).show();
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                 @Override
@@ -136,6 +130,31 @@ public class ProfileActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    //Change your bio
+    private void changeYourBio()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final View customLayout = getLayoutInflater().inflate(R.layout.about_change, null);
+        builder.setView(customLayout);
+
+        builder.setPositiveButton("Update", (dialog, which) -> {
+            String bio;
+            EditText editText = customLayout.findViewById(R.id.editText);
+            bio=editText.getText().toString();
+            databaseReference.child(currentUser).child("about").setValue(bio)
+                    .addOnCompleteListener(task -> {
+                        if(task.isComplete()){
+                            text_bio.setText(bio);
+                            Toast.makeText(ProfileActivity.this, "Bio updated...", Toast.LENGTH_SHORT).show();
+                        }
+                    }).addOnFailureListener(e ->
+                    Toast.makeText(ProfileActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show());
+        }).setNegativeButton("Cancel",null);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    //Todo :- Change the user profile Image
     private void openImage()
     {
         Intent intent=new Intent();
@@ -160,34 +179,26 @@ public class ProfileActivity extends AppCompatActivity {
                     throw task.getException();
                 }
                 return file.getDownloadUrl();
-            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                @Override
-                public void onComplete(@NonNull Task<Uri> task)
+            }).addOnCompleteListener((OnCompleteListener<Uri>) task -> {
+                if(task.isSuccessful()){
+                    Uri downloaduri=task.getResult();
+                    assert downloaduri != null;
+                    String mUri= downloaduri.toString();
+
+                    databaseReference=FirebaseDatabase.getInstance().getReference("Users").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                    HashMap<String,Object> map=new HashMap<>();
+                    map.put("imageurl",mUri);
+                    databaseReference.updateChildren(map);
+
+                    progressDialog.dismiss();
+                }
+                else
                 {
-                    if(task.isSuccessful()){
-                        Uri downloaduri=task.getResult();
-                        assert downloaduri != null;
-                        String mUri= downloaduri.toString();
-
-                        databaseReference=FirebaseDatabase.getInstance().getReference("Users").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                        HashMap<String,Object> map=new HashMap<>();
-                        map.put("imageurl",mUri);
-                        databaseReference.updateChildren(map);
-
-                        progressDialog.dismiss();
-                    }
-                    else
-                    {
-                        Toast.makeText(ProfileActivity.this,"Failed",Toast.LENGTH_SHORT).show();
-                        progressDialog.dismiss();
-                    }
+                    Toast.makeText(ProfileActivity.this,"Failed",Toast.LENGTH_SHORT).show();
+                    progressDialog.dismiss();
                 }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(ProfileActivity.this,e.getMessage(),Toast.LENGTH_SHORT).show();
-                }
-            });
+            }).addOnFailureListener(e ->
+                    Toast.makeText(ProfileActivity.this,e.getMessage(),Toast.LENGTH_SHORT).show());
         }else {
             Toast.makeText(ProfileActivity.this,"no image selected",Toast.LENGTH_SHORT).show();
         }
@@ -216,6 +227,7 @@ public class ProfileActivity extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if(snapshot.exists())
                         {
+                            String fullname=snapshot.child("fullname").getValue().toString();
                             String image=snapshot.child("imageurl").getValue().toString();
                             String name=snapshot.child("username").getValue().toString();
                             String bio=snapshot.child("about").getValue().toString();
@@ -227,6 +239,7 @@ public class ProfileActivity extends AppCompatActivity {
                             }
                             text_name.setText(name);
                             text_bio.setText(bio);
+                            full_name.setText(fullname);
                                 //Picasso.get().load(image).placeholder(R.drawable.person).into(imageView1);
                         }
                     }
