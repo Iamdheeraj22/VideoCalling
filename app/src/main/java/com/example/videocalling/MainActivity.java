@@ -21,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.videocalling.databinding.ActivityMainBinding;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -33,6 +34,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
+
+import java.util.List;
 
 import Classes.Contacts;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -162,7 +165,13 @@ public class MainActivity extends AppCompatActivity {
                                     imageUrl=snapshot.child("imageurl").getValue().toString();
                                     status=snapshot.child("status").getValue().toString();
                                     contactsViewHolder.contacts_username.setText(userName);
-                                    Picasso.get().load(imageUrl).into(contactsViewHolder.contacts_image);
+
+                                    if (imageUrl.equals("default")){
+                                        contactsViewHolder.contacts_image.setImageResource(R.drawable.person);
+                                    }else{
+                                        Glide.with(MainActivity.this).load(imageUrl).into(contactsViewHolder.contacts_image);
+                                    }
+                                    //Picasso.get().load(imageUrl).into(contactsViewHolder.contacts_image);
 
                                    if(status.equals("Online")){
                                         contactsViewHolder.status_on.setVisibility(View.VISIBLE);
@@ -220,6 +229,14 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onCancelled(@NonNull DatabaseError error) {
                                 Toast.makeText(MainActivity.this,error.toException().getMessage(),Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                        contactsViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent=new Intent(MainActivity.this,Contact_activity.class);
+                                intent.putExtra("contact",listUserId);
+                                startActivity(intent);
                             }
                         });
                     }

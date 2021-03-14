@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
@@ -64,6 +65,7 @@ public class ProfileActivity extends AppCompatActivity {
         databaseReference= FirebaseDatabase.getInstance().getReference().child("Users");
         UserProfileRef= FirebaseStorage.getInstance().getReference().child("Profile Images");
         currentUser=FirebaseAuth.getInstance().getCurrentUser().getUid();
+
         imageView1.setOnClickListener(v -> {
 
             PopupMenu popupMenu=new PopupMenu(ProfileActivity.this,imageView1);
@@ -74,7 +76,7 @@ public class ProfileActivity extends AppCompatActivity {
                 public boolean onMenuItemClick(MenuItem item) {
                     int itemId = item.getItemId();
                     if (itemId == R.id.changeImage) {
-                        final CharSequence[] options = {"Choose from Gallery","Cancel" };
+                        final CharSequence[] options = {"Choose from Gallery","Remove Image","Cancel" };
                         AlertDialog.Builder builder = new AlertDialog.Builder(ProfileActivity.this);
                         builder.setTitle("Add Photo!");
                         builder.setItems(options,new DialogInterface.OnClickListener() {
@@ -85,7 +87,11 @@ public class ProfileActivity extends AppCompatActivity {
                                     openImage();
                                 }
                                 else if(options[which].equals("Cancel")){
-                                    dialog.dismiss(); }}
+                                    dialog.dismiss();
+                                }else if(options[which].equals("Remove Image")){
+                                    removeImage();
+                                }
+                            }
                         });
                         builder.show();
                         return true;}
@@ -100,6 +106,24 @@ public class ProfileActivity extends AppCompatActivity {
             changeYourName();
         });
         RetrieveUserData();
+    }
+
+    private void removeImage()
+    {
+        databaseReference= FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser).child("imageurl");
+        databaseReference.setValue("default").addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isComplete()){
+                    imageView1.setImageResource(R.drawable.person);
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(ProfileActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     // Change Your Name
@@ -174,8 +198,7 @@ public class ProfileActivity extends AppCompatActivity {
             final StorageReference file=UserProfileRef.child(System.currentTimeMillis()+"."+getFileExtension(ImageUri));
             uploadTask=file.putFile(ImageUri);
             uploadTask.continueWithTask((Continuation<UploadTask.TaskSnapshot, Task<Uri>>) task -> {
-                if(!task.isSuccessful())
-                {
+                if(!task.isSuccessful()){
                     throw task.getException();
                 }
                 return file.getDownloadUrl();
@@ -192,8 +215,7 @@ public class ProfileActivity extends AppCompatActivity {
 
                     progressDialog.dismiss();
                 }
-                else
-                {
+                else{
                     Toast.makeText(ProfileActivity.this,"Failed",Toast.LENGTH_SHORT).show();
                     progressDialog.dismiss();
                 }
@@ -212,8 +234,7 @@ public class ProfileActivity extends AppCompatActivity {
             ImageUri=data.getData();
             if(uploadTask!=null && uploadTask.isInProgress()){
                 Toast.makeText(ProfileActivity.this,"Upload in Progress",Toast.LENGTH_SHORT).show();
-            }else
-            {
+            }else{
                 uploadImage();
             }
         }
@@ -225,14 +246,12 @@ public class ProfileActivity extends AppCompatActivity {
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if(snapshot.exists())
-                        {
+                        if(snapshot.exists()){
                             String fullname=snapshot.child("fullname").getValue().toString();
                             String image=snapshot.child("imageurl").getValue().toString();
                             String name=snapshot.child("username").getValue().toString();
                             String bio=snapshot.child("about").getValue().toString();
-                            if(image.equals("default"))
-                            {
+                            if(image.equals("default")){
                                 imageView1.setImageResource(R.drawable.person);
                             }else{
                                 Glide.with(ProfileActivity.this).load(image).into(imageView1);

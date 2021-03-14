@@ -13,7 +13,8 @@
         android:roundIcon="@drawable/applogo"
         android:supportsRtl="true"
         android:theme="@style/Theme.VideoCalling">
-        <activity android:name=".AboutUs"/>
+        <activity android:name=".Contact_activity"></activity>
+        <activity android:name=".AboutUs" />
         <activity android:name=".videoCallActivity" />
         <activity android:name=".calling_activity" />
         <activity
@@ -41,6 +42,7 @@
         <activity android:name=".StartActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

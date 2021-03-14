@@ -1,8 +1,5 @@
 package com.example.videocalling;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -13,8 +10,10 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -41,9 +40,8 @@ public class videoCallActivity extends AppCompatActivity implements Session.Sess
     private static final String LOG_TAG=videoCallActivity.class.getSimpleName();
     private static final int RC_VIDEO_APP_PERMISSION=124;
     DatabaseReference usersRef;
-    ImageView endVideoCall;
     String UserId="";
-    FloatingActionButton rotation;
+    FloatingActionButton rotation,endVideoCall;
     Boolean isRotate;
     //Drag and drop parameter
     float xd,yd;
