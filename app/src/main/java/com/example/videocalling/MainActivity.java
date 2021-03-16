@@ -1,5 +1,6 @@
 package com.example.videocalling;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -33,11 +34,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.squareup.picasso.Picasso;
 
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import Classes.Contacts;
+import Classes.MyDatabaseHelper;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity {
@@ -49,9 +51,10 @@ public class MainActivity extends AppCompatActivity {
     DatabaseReference contactsRef,userRef;
     FirebaseAuth mAuth;
     String currentUserId;
-    String userName="",imageUrl="",status="";
+    String userName="",imageUrl="",status="",fullname="";
     String callBy="";
-    FloatingActionButton featuresBtn,exitBtn,restartBtn;
+    String currentUserIdName,currentIdUserName;
+    FloatingActionButton featuresBtn,exitBtn,callHistoryBtn;
     Boolean isAllFloatingButtonVisible;
 
     @Override
@@ -64,44 +67,14 @@ public class MainActivity extends AppCompatActivity {
         navView = findViewById(R.id.nav_view);
         navView.setSelectedItemId(R.id.setting);
 
+        //Call the NavigationView
+        NavigationView();
+
         mAuth=FirebaseAuth.getInstance();
         contactsRef= FirebaseDatabase.getInstance().getReference().child("Contacts");
         userRef=FirebaseDatabase.getInstance().getReference().child("Users");
         currentUserId=mAuth.getCurrentUser().getUid();
-        navView.setOnNavigationItemSelectedListener(item -> {
-            int itemId = item.getItemId();
-            if (itemId == R.id.setting) {
-                startActivity(new Intent(MainActivity.this, ProfileActivity.class));
-                return true;
-            }else if(itemId ==R.id.navigation_notifications){
-                startActivity(new Intent(MainActivity.this,NotificationActivity.class));
-                return true;
-            }else if(itemId == R.id.Logout){
-                AlertDialog.Builder alertDialog=new AlertDialog.Builder(this);
-                alertDialog.setMessage("Do you want to logout your account?")
-                        .setCancelable(false)
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                FirebaseAuth.getInstance().signOut();
-                                startActivity(new Intent(MainActivity.this,LoginActivity.class));
-                            }
-                        })
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                //  Action for 'NO' Button
-                                dialog.cancel();
-                            }
-                        });
-                AlertDialog alert = alertDialog.create();
-                alert.setTitle("Account Logout!");
-                alert.show();
-                return true;
-            }else if(itemId == R.id.home){
-                startActivity(new Intent(MainActivity.this,MainActivity.class));
-                return true;
-            }
-            return false;
-        });
+
         findPersonbtn=findViewById(R.id.image_contacts_btn);
         myContactsList=findViewById(R.id.contacts_list);
         myContactsList.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -115,22 +88,24 @@ public class MainActivity extends AppCompatActivity {
         featuresBtn.setOnClickListener(v -> {
             Animation animation1 = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fade);
             if (!isAllFloatingButtonVisible) {
-                restartBtn.show();
-                restartBtn.startAnimation(animation1);
+                callHistoryBtn.show();
+                callHistoryBtn.startAnimation(animation1);
                 exitBtn.show();
                 exitBtn.startAnimation(animation1);
                 isAllFloatingButtonVisible = true;
                 featuresBtn.setImageResource(R.drawable.minimize);
             } else {
-                restartBtn.hide();
+                callHistoryBtn.hide();
                 exitBtn.hide();
                 isAllFloatingButtonVisible = false;
                 featuresBtn.setImageResource(R.drawable.maximize);
             }
         });
         //Restart the app
-        restartBtn.setOnClickListener(v -> {
-            restart();
+        callHistoryBtn.setOnClickListener(v -> {
+            //restart();
+            Intent intent=new Intent(MainActivity.this,videocall_history.class);
+            startActivity(intent);
         });
         //Exit the app
         exitBtn.setOnClickListener(v -> {
@@ -143,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
         setOnlineAndOfflineStatus();
         checkForReceivingCall();
         validateUser();
+        getInfromationOfCurrentUser();
         FirebaseRecyclerOptions<Contacts> firebaseRecyclerOptions=
                 new FirebaseRecyclerOptions.Builder<Contacts>()
                 .setQuery(contactsRef.child(currentUserId),Contacts.class)
@@ -164,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
                                     userName=snapshot.child("username").getValue().toString();
                                     imageUrl=snapshot.child("imageurl").getValue().toString();
                                     status=snapshot.child("status").getValue().toString();
+                                    fullname=snapshot.child("fullname").getValue().toString();
                                     contactsViewHolder.contacts_username.setText(userName);
 
                                     if (imageUrl.equals("default")){
@@ -195,10 +172,13 @@ public class MainActivity extends AppCompatActivity {
                                             {
                                                 if(snapshot.exists())
                                                 {
+                                                    @SuppressLint("SimpleDateFormat")
+                                                    String currentDate = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
                                                     status=snapshot.child("status").getValue().toString();
-
+                                                    MyDatabaseHelper myDatabaseHelper=new MyDatabaseHelper(MainActivity.this);
                                                     if(status.equals("Online"))
                                                     {
+                                                        myDatabaseHelper.addCallingHistory(currentIdUserName,userName,fullname,listUserId,currentDate);
                                                         Intent intent=new Intent(MainActivity.this,calling_activity.class);
                                                         intent.putExtra("visit_user_id",listUserId);
                                                         startActivity(intent);
@@ -251,6 +231,26 @@ public class MainActivity extends AppCompatActivity {
         myContactsList.setAdapter(firebaseRecyclerAdapter);
         firebaseRecyclerAdapter.startListening();
     }
+
+    //get the current user information
+    private void getInfromationOfCurrentUser()
+    {
+        userRef.child(currentUserId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    currentIdUserName=snapshot.child("username").getValue().toString();
+                    currentUserIdName=snapshot.child("fullname").getValue().toString();
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(MainActivity.this, error.toException().getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    //Check the online and offline status of the contact
     private void setOnlineAndOfflineStatus(){
         userRef.child(currentUserId).child("status").setValue("Online")
                 .addOnCompleteListener(task -> {
@@ -301,6 +301,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
+
+    //Check the user is valid or not
     private void validateUser(){
         DatabaseReference reference=FirebaseDatabase.getInstance().getReference();
         reference.child("Users").child(currentUserId).addValueEventListener(new ValueEventListener() {
@@ -318,6 +320,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    // Destroy the app
    @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -328,9 +332,13 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }).addOnFailureListener(e -> Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show());
     }
+
+    //exit from the app
     private void exit() {
         finish();
     }
+
+    //Restart the app
     private void restart()
     {
         finish();
@@ -342,13 +350,54 @@ public class MainActivity extends AppCompatActivity {
             }
         },1000);
     }
+
+    //initialize the widgets
     private void initViews()
     {
         featuresBtn=findViewById(R.id.features_app);
-        restartBtn=findViewById(R.id.restart_app);
+        callHistoryBtn=findViewById(R.id.call_historyBtn);
         exitBtn=findViewById(R.id.exit_app);
         isAllFloatingButtonVisible=false;
-        restartBtn.hide();
+        callHistoryBtn.hide();
         exitBtn.hide();
+    }
+
+    //Processing of the navigation View
+    private void NavigationView()
+    {
+        navView.setOnNavigationItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if(itemId == R.id.home){
+                startActivity(new Intent(MainActivity.this,MainActivity.class));
+                return true;
+            }else if (itemId == R.id.setting) {
+                startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+                return true;
+            }else if(itemId ==R.id.navigation_notifications){
+                startActivity(new Intent(MainActivity.this,NotificationActivity.class));
+                return true;
+            }else if(itemId == R.id.Logout){
+                AlertDialog.Builder alertDialog=new AlertDialog.Builder(this);
+                alertDialog.setMessage("Do you want to logout your account?")
+                        .setCancelable(false)
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                FirebaseAuth.getInstance().signOut();
+                                startActivity(new Intent(MainActivity.this,LoginActivity.class));
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                //  Action for 'NO' Button
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog alert = alertDialog.create();
+                alert.setTitle("Account Logout!");
+                alert.show();
+                return true;
+            }
+            return false;
+        });
     }
 }

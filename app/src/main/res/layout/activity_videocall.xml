@@ -32,6 +32,7 @@
         android:src="@drawable/endcall"
         android:layout_alignParentBottom="true"
         app:fabSize="normal"
+        android:backgroundTint="#D80F00"
         android:layout_margin="20dp"
         tools:ignore="ContentDescription" />
     <com.google.android.material.floatingactionbutton.FloatingActionButton

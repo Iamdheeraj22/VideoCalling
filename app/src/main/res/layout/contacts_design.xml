@@ -4,7 +4,8 @@
     android:layout_height="wrap_content"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_marginTop="10dp"
-    android:elevation="20dp">
+    android:elevation="20dp"
+    android:backgroundTint="#D7D5DA">
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -33,6 +34,7 @@
             android:id="@+id/calling_btn"
             android:src="@drawable/videocall"
             android:layout_alignParentEnd="true"
+            android:backgroundTint="#17F320"
             android:layout_marginEnd="20dp"
             android:layout_marginTop="3dp"
             tools:ignore="ContentDescription" />

@@ -13,9 +13,11 @@
         android:roundIcon="@drawable/applogo"
         android:supportsRtl="true"
         android:theme="@style/Theme.VideoCalling">
-        <activity android:name=".Contact_activity"></activity>
+        <activity android:name=".videocall_history"/>
+        <activity android:name=".Contact_activity" />
         <activity android:name=".AboutUs" />
-        <activity android:name=".videoCallActivity" />
+        <activity android:name=".videoCallActivity"
+            android:parentActivityName=".MainActivity"/>
         <activity android:name=".calling_activity" />
         <activity
             android:name=".UserProfileActivity"
