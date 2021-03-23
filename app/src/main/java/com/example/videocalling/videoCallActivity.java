@@ -167,8 +167,9 @@ public class videoCallActivity extends AppCompatActivity implements Session.Sess
     }
 
     @Override
-    public void onStreamDestroyed(PublisherKit publisherKit, Stream stream) {
-
+    public void onStreamDestroyed(PublisherKit publisherKit, Stream stream)
+    {
+        finish();
     }
 
     @Override
@@ -192,8 +193,8 @@ public class videoCallActivity extends AppCompatActivity implements Session.Sess
     }
 
     @Override
-    public void onDisconnected(Session session) {
-
+    public void onDisconnected(Session session){
+        finish();
     }
 
     @Override
@@ -210,8 +211,7 @@ public class videoCallActivity extends AppCompatActivity implements Session.Sess
     @Override
     public void onStreamDropped(Session session, Stream stream) {
         Log.i(LOG_TAG,"Stream Dropped");
-        if(mSubscriber !=null)
-        {
+        if(mSubscriber !=null){
             mSubscriber=null;
             mSubscriberController.removeAllViews();
         }

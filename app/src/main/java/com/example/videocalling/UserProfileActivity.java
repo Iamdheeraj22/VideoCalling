@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -40,7 +41,12 @@ public class UserProfileActivity extends AppCompatActivity {
         receiverUserId=getIntent().getExtras().get("visit_user_id").toString();
         receiverUserName=getIntent().getExtras().get("profile_name").toString();
         receiverUserImage=getIntent().getExtras().get("profile_image").toString();
-        Picasso.get().load(receiverUserImage).into(imageView);
+
+        if(receiverUserImage.equals("default")){
+            imageView.setImageResource(R.drawable.person);
+        }else {
+            Glide.with(UserProfileActivity.this).load(receiverUserImage).into(imageView);
+        }
         textView.setText(receiverUserName);
 
         checkUser();
@@ -83,12 +89,7 @@ public class UserProfileActivity extends AppCompatActivity {
                         btn1.setText("Accept Friend Request");
 
                         btn2.setVisibility(View.VISIBLE);
-                        btn2.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                CancelFriendRequest();
-                            }
-                        });
+                        btn2.setOnClickListener(v -> CancelFriendRequest());
                     }
                 }
                 else {

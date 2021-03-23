@@ -333,6 +333,7 @@ public class MainActivity extends AppCompatActivity {
                 }).addOnFailureListener(e -> Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
+
     //exit from the app
     private void exit() {
         finish();
@@ -363,39 +364,41 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //Processing of the navigation View
+    @SuppressLint("NonConstantResourceId")
     private void NavigationView()
     {
         navView.setOnNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
-            if(itemId == R.id.home){
-                startActivity(new Intent(MainActivity.this,MainActivity.class));
-                return true;
-            }else if (itemId == R.id.setting) {
-                startActivity(new Intent(MainActivity.this, ProfileActivity.class));
-                return true;
-            }else if(itemId ==R.id.navigation_notifications){
-                startActivity(new Intent(MainActivity.this,NotificationActivity.class));
-                return true;
-            }else if(itemId == R.id.Logout){
-                AlertDialog.Builder alertDialog=new AlertDialog.Builder(this);
-                alertDialog.setMessage("Do you want to logout your account?")
-                        .setCancelable(false)
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                FirebaseAuth.getInstance().signOut();
-                                startActivity(new Intent(MainActivity.this,LoginActivity.class));
-                            }
-                        })
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                //  Action for 'NO' Button
-                                dialog.cancel();
-                            }
-                        });
-                AlertDialog alert = alertDialog.create();
-                alert.setTitle("Account Logout!");
-                alert.show();
-                return true;
+            switch (itemId) {
+                case R.id.home:
+                    startActivity(new Intent(MainActivity.this, MainActivity.class));
+                    return true;
+                case R.id.setting:
+                    startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+                    return true;
+                case R.id.navigation_notifications:
+                    startActivity(new Intent(MainActivity.this, NotificationActivity.class));
+                    return true;
+                case R.id.Logout:
+                    AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+                    alertDialog.setMessage("Do you want to logout your account?")
+                            .setCancelable(false)
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    FirebaseAuth.getInstance().signOut();
+                                    startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                                }
+                            })
+                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    //  Action for 'NO' Button
+                                    dialog.cancel();
+                                }
+                            });
+                    AlertDialog alert = alertDialog.create();
+                    alert.setTitle("Account Logout!");
+                    alert.show();
+                    return true;
             }
             return false;
         });

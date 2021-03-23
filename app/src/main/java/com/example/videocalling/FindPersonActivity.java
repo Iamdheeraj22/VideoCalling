@@ -1,11 +1,13 @@
 package com.example.videocalling;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -20,6 +22,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
@@ -67,6 +70,7 @@ public class  FindPersonActivity extends AppCompatActivity {
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onStart() {
         super.onStart();
@@ -76,8 +80,8 @@ public class  FindPersonActivity extends AppCompatActivity {
             contactsFirebaseRecyclerOptions=new FirebaseRecyclerOptions.Builder<Contacts>()
                             .setQuery(databaseReference,Contacts.class)
                             .build();
-        }else
-        {
+        }
+        if(!str.equals("")){
             contactsFirebaseRecyclerOptions=new FirebaseRecyclerOptions.Builder<Contacts>()
                     .setQuery(databaseReference.orderByChild("username")
                                     .startAt(str)
@@ -92,8 +96,11 @@ public class  FindPersonActivity extends AppCompatActivity {
                     protected void onBindViewHolder(@NonNull FindFriendHolder findFriendHolder, int position, @NonNull Contacts model)
                     {
                         findFriendHolder.contacts_username.setText(model.getUsername());
-                        Picasso.get().load(model.getImageurl()).into(findFriendHolder.contacts_image);
-
+                        if(model.getImageurl().equals("default")){
+                            findFriendHolder.contacts_image.setImageResource(R.drawable.person);
+                        }else {
+                            Glide.with(FindPersonActivity.this).load(model.getImageurl()).into(findFriendHolder.contacts_image);
+                        }
                         findFriendHolder.itemView.setOnClickListener(new View.OnClickListener()
                         {
                             @Override
