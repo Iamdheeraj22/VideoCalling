@@ -29,8 +29,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import Classes.Notification;
-import Classes.Contacts;
+import com.example.videocalling.Classes.Notification;
+import com.example.videocalling.Classes.Contacts;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class NotificationActivity extends AppCompatActivity {
 
@@ -92,75 +94,66 @@ public class NotificationActivity extends AppCompatActivity {
                                                         holder.person_image.setImageResource(R.drawable.person);
                                                     }
                                                 }
-                                                final String fullname=snapshot.child("fullname").getValue().toString();
-                                                final String username=snapshot.child("username").getValue().toString();
+                                                final String firstname=snapshot.child("firstname").getValue().toString();
+                                                final String lastname=snapshot.child("lastname").getValue().toString();
+                                                final String fullname=firstname+" "+lastname;
                                                 createNotification1(fullname);
-                                                holder.user_name.setText(username);
+                                                holder.user_name.setText(fullname);
                                                 holder.btn1.setOnClickListener(v -> contactRef.child(currentUserId).child(listUserId)
                                                         .child("Contact").setValue("Saved")
-                                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                            @Override
-                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                if(task.isSuccessful()){
-                                                                    contactRef.child(listUserId).child(currentUserId)
-                                                                            .child("Contact").setValue("Saved")
-                                                                            .addOnCompleteListener(task1 -> {
-                                                                                if(task1.isSuccessful())
-                                                                                {
-                                                                                    friendRequestRef.child(currentUserId).child(listUserId)
-                                                                                            .removeValue()
-                                                                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                                @Override
-                                                                                                public void onComplete(@NonNull Task<Void> task1) {
-                                                                                                    if(task1.isSuccessful())
-                                                                                                    {
-                                                                                                        friendRequestRef.child(listUserId).child(currentUserId)
-                                                                                                                .removeValue()
-                                                                                                                .addOnCompleteListener(task11 -> {
-                                                                                                                    if(task11.isSuccessful()){
-                                                                                                                        Toast.makeText(NotificationActivity.this, "New Contact Saved....", Toast.LENGTH_SHORT).show();
-                                                                                                                    }
-                                                                                                                });
-                                                                                                    }
-                                                                                                }
-                                                                                            });
-                                                                                }
-                                                                            });
-                                                                }
+                                                        .addOnCompleteListener(task -> {
+                                                            if(task.isSuccessful()){
+                                                                contactRef.child(listUserId).child(currentUserId)
+                                                                        .child("Contact").setValue("Saved")
+                                                                        .addOnCompleteListener(task1 -> {
+                                                                            if(task1.isSuccessful())
+                                                                            {
+                                                                                friendRequestRef.child(currentUserId).child(listUserId)
+                                                                                        .removeValue()
+                                                                                        .addOnCompleteListener(task112 -> {
+                                                                                            if(task112.isSuccessful())
+                                                                                            {
+                                                                                                friendRequestRef.child(listUserId).child(currentUserId)
+                                                                                                        .removeValue()
+                                                                                                        .addOnCompleteListener(task11 -> {
+                                                                                                            if(task11.isSuccessful()){
+                                                                                                                Toast.makeText(NotificationActivity.this, "New Contact Saved....", Toast.LENGTH_SHORT).show();
+                                                                                                            }
+                                                                                                        });
+                                                                                            }
+                                                                                        });
+                                                                            }
+                                                                        });
                                                             }
                                                         }));
                                                 holder.btn2.setOnClickListener(v -> friendRequestRef.child(currentUserId).child(listUserId)
                                                         .removeValue()
-                                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                            @Override
-                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                if(task.isSuccessful())
-                                                                {
-                                                                    friendRequestRef.child(listUserId).child(currentUserId)
-                                                                            .removeValue()
-                                                                            .addOnCompleteListener(task12 -> {
-                                                                                if(task12.isSuccessful()){
-                                                                                    Toast.makeText(NotificationActivity.this, "friend request deleted....", Toast.LENGTH_SHORT).show();
-                                                                                }
-                                                                            });
-                                                                }
+                                                        .addOnCompleteListener(task -> {
+                                                            if(task.isSuccessful())
+                                                            {
+                                                                friendRequestRef.child(listUserId).child(currentUserId)
+                                                                        .removeValue()
+                                                                        .addOnCompleteListener(task12 -> {
+                                                                            if(task12.isSuccessful()){
+                                                                                Toast.makeText(NotificationActivity.this, "friend request deleted....", Toast.LENGTH_SHORT).show();
+                                                                            }
+                                                                        });
                                                             }
                                                         }));
                                             }
                                             @Override
                                             public void onCancelled(@NonNull DatabaseError error) {
-
+                                                Toast.makeText(NotificationActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
                                             }});
                                     }
                                 }
                             }
                             @Override
                             public void onCancelled(@NonNull DatabaseError error) {
-
+                                Toast.makeText(NotificationActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         });
                     }
-
                     @NonNull
                     @Override
                     public NotificationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -176,7 +169,7 @@ public class NotificationActivity extends AppCompatActivity {
     public static class NotificationViewHolder extends RecyclerView.ViewHolder
     {
         TextView user_name;
-        Button btn1,btn2;
+        CircleImageView btn1,btn2;
         ImageView person_image;
         RelativeLayout layout;
         public NotificationViewHolder(@NonNull View itemView)

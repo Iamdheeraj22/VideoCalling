@@ -124,19 +124,19 @@ public class UserProfileActivity extends AppCompatActivity {
             btn1.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                            if(currentState.equals("new")){
-                                sendFriendRequest();
-                            }
-                            if(currentState.equals("request_sent")){
-                                CancelFriendRequest();
-                            }
-                            if(currentState.equals("request_received")){
-                                    AcceptFriendRequest();
-                            }
-                            if(currentState.equals("request_sent")){
-                                CancelFriendRequest();
-                            }
+                    if(currentState.equals("new")){
+                        sendFriendRequest();
                     }
+                    if(currentState.equals("request_sent")){
+                        CancelFriendRequest();
+                    }
+                    if(currentState.equals("request_received")){
+                        AcceptFriendRequest();
+                    }
+                    if(currentState.equals("request_sent")){
+                        CancelFriendRequest();
+                    }
+                }
             });
         }
     }

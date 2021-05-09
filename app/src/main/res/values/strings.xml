@@ -10,4 +10,25 @@
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="title_activity_main">MainActivity</string>
+
+    <string name="email">Email</string>
+    <string name="you_example_com">you.example.com</string>
+    <string name="u2022_u2022_u2022_u2022_u2022_u2022_u2022_u2022">• • • • • • • •</string>
+    <string name="sign_in">Sign in</string>
+    <string name="password">Password</string>
+    <string name="don_t_have_an_account">Don\'t have an account?</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="title">We need a few details to get your account ready</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="welcome_to">Welcome To</string>
+    <string name="talkvideo_video_meeting">TalkVideo Video Meeting</string>
+    <string name="sign_in_to_your_account">Sign in to your account</string>
+    <string name="forget_your_password">Forget Your Password</string>
+    <string name="send_reset_password_link">Send Reset Password Link</string>
+    <string name="forget_password_activity">Forget Password Activity</string>
+    <string name="call_us_at">Call us at</string>
+    <string name="email_us_at">Email us at</string>
+    <string name="address">Sand Chowk Bhojlai Bass\n Ward No. 49,Sujangarh\nRajasthan , India \nPinCode : 331507</string>
 </resources>

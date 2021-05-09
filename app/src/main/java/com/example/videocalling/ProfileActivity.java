@@ -43,7 +43,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    TextView text_name,text_bio,full_name;
+    TextView text_name,text_bio,text_email;
     CircleImageView imageView1;
     private StorageTask uploadTask;
     private static final int IMAGE_REQUEST=1;
@@ -60,7 +60,7 @@ public class ProfileActivity extends AppCompatActivity {
         text_bio=findViewById(R.id.text_bio);
         text_name=findViewById(R.id.text_name);
         imageView1=findViewById(R.id.imageview1);
-        full_name=findViewById(R.id.name);
+        text_email=findViewById(R.id.text_email);
         progressDialog=new ProgressDialog(this);
         databaseReference= FirebaseDatabase.getInstance().getReference().child("Users");
         UserProfileRef= FirebaseStorage.getInstance().getReference().child("Profile Images");
@@ -102,9 +102,6 @@ public class ProfileActivity extends AppCompatActivity {
         text_bio.setOnClickListener(v -> {
             changeYourBio();
         });
-        full_name.setOnClickListener(v -> {
-            changeYourName();
-        });
         RetrieveUserData();
     }
 
@@ -118,42 +115,10 @@ public class ProfileActivity extends AppCompatActivity {
                     imageView1.setImageResource(R.drawable.person);
                 }
             }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Toast.makeText(ProfileActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+        }).addOnFailureListener(e ->
+                Toast.makeText(ProfileActivity.this,
+                        e.getMessage(), Toast.LENGTH_SHORT).show());
     }
-
-    // Change Your Name
-    private void changeYourName()
-    {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        final View customLayout = getLayoutInflater().inflate(R.layout.name_change, null);
-        builder.setView(customLayout);
-
-        builder.setPositiveButton("Update", (dialog, which) -> {
-            String name;
-            EditText editText = customLayout.findViewById(R.id.editText_name);
-            name=editText.getText().toString();
-            databaseReference.child(currentUser).child("fullname").setValue(name)
-                    .addOnCompleteListener(task -> {
-                        if(task.isComplete()){
-                            full_name.setText(name);
-                            Toast.makeText(ProfileActivity.this, "Name updated...", Toast.LENGTH_SHORT).show();
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(ProfileActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
-        }).setNegativeButton("Cancel",null);
-        AlertDialog dialog = builder.create();
-        dialog.show();
-    }
-
     //Change your bio
     private void changeYourBio()
     {
@@ -163,7 +128,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         builder.setPositiveButton("Update", (dialog, which) -> {
             String bio;
-            EditText editText = customLayout.findViewById(R.id.editText);
+            EditText editText = customLayout.findViewById(R.id.editText_bio);
             bio=editText.getText().toString();
             databaseReference.child(currentUser).child("about").setValue(bio)
                     .addOnCompleteListener(task -> {
@@ -244,21 +209,23 @@ public class ProfileActivity extends AppCompatActivity {
     {
         databaseReference.child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                 .addValueEventListener(new ValueEventListener() {
+                    @SuppressLint("SetTextI18n")
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if(snapshot.exists()){
-                            String fullname=snapshot.child("fullname").getValue().toString();
+                            String firstname=snapshot.child("firstname").getValue().toString();
+                            String lastname=snapshot.child("lastname").getValue().toString();
                             String image=snapshot.child("imageurl").getValue().toString();
-                            String name=snapshot.child("username").getValue().toString();
-                            String bio=snapshot.child("about").getValue().toString();
+                            String email=snapshot.child("email").getValue().toString();
+                            String bio=snapshot.child("bio").getValue().toString();
                             if(image.equals("default")){
                                 imageView1.setImageResource(R.drawable.person);
                             }else{
                                 Glide.with(ProfileActivity.this).load(image).into(imageView1);
                             }
-                            text_name.setText(name);
+                            text_name.setText(firstname+" "+lastname);
                             text_bio.setText(bio);
-                            full_name.setText(fullname);
+                            text_email.setText(email);
                                 //Picasso.get().load(image).placeholder(R.drawable.person).into(imageView1);
                         }
                     }

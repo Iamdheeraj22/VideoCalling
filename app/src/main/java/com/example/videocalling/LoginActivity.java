@@ -1,44 +1,35 @@
 package com.example.videocalling;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends AppCompatActivity {
 
-    Button btn4,btn5,btn6;
-    TextView forget_password;
-    EditText email2,password2;
+    TextView text_SignUp;
+    EditText email,password;
+    MaterialButton signInButton;
+    ProgressBar progressBar;
     FirebaseAuth firebaseAuth;
-    ProgressDialog progressDialog;
 
     @Override
     protected void onStart() {
         super.onStart();
+        progressBar.setVisibility(View.INVISIBLE);
         AlertDialog.Builder alert=new AlertDialog.Builder(LoginActivity.this);
         alert.setMessage("If you are new user then first verify your email(Check your email)")
-                .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Toast.makeText(LoginActivity.this,"Thank you",Toast.LENGTH_SHORT).show();
-                    }
-                });
+                .setPositiveButton("Okay", (dialog, which) -> Toast.makeText(LoginActivity.this,"Thank you",Toast.LENGTH_SHORT).show());
         AlertDialog alertDialog=alert.create();
         alertDialog.setTitle("Notice");
         alertDialog.show();
@@ -49,71 +40,61 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        btn4=findViewById(R.id.btn4);
-        email2=findViewById(R.id.email2);
-        password2=findViewById(R.id.password2);
-        forget_password=findViewById(R.id.forget);
+        signInButton=findViewById(R.id.buttonSignIn);
+        email=findViewById(R.id.inputEmail);
+        password=findViewById(R.id.inputPassword);
+        text_SignUp=findViewById(R.id.textSignUp);
+        progressBar=findViewById(R.id.signInProgressBar);
         firebaseAuth= FirebaseAuth.getInstance();
-        progressDialog=new ProgressDialog(this);
-        progressDialog.setMessage("Please wait few moments...");
-        btn5=findViewById(R.id.btn5);
-        btn6=findViewById(R.id.btn6);
-        btn6.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(LoginActivity.this,RegisterActivity.class));
-                finish();
-            }
+
+        text_SignUp.setOnClickListener(v->{
+            sendSignInActivity();
+            email.setText("");
+            password.setText("");
         });
-        btn5.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(LoginActivity.this,MainActivity.class));
-                finish();
-            }
-        });
-        forget_password.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent=new Intent(LoginActivity.this,ForgetActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        });
-        btn4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                progressDialog.show();
-                String txt_email=email2.getText().toString();
-                String txt_password=password2.getText().toString();
-                if(TextUtils.isEmpty(txt_email) || TextUtils.isEmpty(txt_password)){
-                    Toast.makeText(LoginActivity.this,"Please fill all required field!",Toast.LENGTH_SHORT).show();
-                }else
-                {
-                    firebaseAuth.signInWithEmailAndPassword(txt_email,txt_password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if(task.isSuccessful())
-                            {
-                                if(firebaseAuth.getCurrentUser().isEmailVerified())
-                                {
-                                    progressDialog.dismiss();
-                                    Intent intent=new Intent(LoginActivity.this,MainActivity.class);
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    startActivity(intent);
-                                }else {
-                                    progressDialog.dismiss();
-                                    Toast.makeText(LoginActivity.this,"Please verify emailAddress",Toast.LENGTH_SHORT).show();
-                                }
-                            }else
-                            {
-                                progressDialog.dismiss();
-                                Toast.makeText(LoginActivity.this,task.getException().getMessage(),Toast.LENGTH_SHORT).show();
-                            }
+
+        signInButton.setOnClickListener(v -> {
+            progressBar.setVisibility(View.VISIBLE);
+            signInButton.setVisibility(View.INVISIBLE);
+            String txt_email=email.getText().toString();
+            String txt_password=password.getText().toString();
+            if(TextUtils.isEmpty(txt_email) || TextUtils.isEmpty(txt_password)){
+                Toast.makeText(LoginActivity.this,"Please fill all required field!",Toast.LENGTH_SHORT).show();
+                progressBar.setVisibility(View.INVISIBLE);
+                signInButton.setVisibility(View.VISIBLE);
+            }else
+            {
+                progressBar.setVisibility(View.VISIBLE);
+                signInButton.setVisibility(View.INVISIBLE);
+                firebaseAuth.signInWithEmailAndPassword(txt_email,txt_password).addOnCompleteListener(task -> {
+                    if(task.isSuccessful())
+                    {
+                        if(firebaseAuth.getCurrentUser().isEmailVerified())
+                        {
+                            Intent intent=new Intent(LoginActivity.this,MainActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }else {
+                            progressBar.setVisibility(View.INVISIBLE);
+                            signInButton.setVisibility(View.VISIBLE);
+                            Toast.makeText(LoginActivity.this,"Please verify emailAddress",Toast.LENGTH_SHORT).show();
                         }
-                    });
-                }
+                    }else
+                    {
+                        progressBar.setVisibility(View.INVISIBLE);
+                        signInButton.setVisibility(View.VISIBLE);
+                        Toast.makeText(LoginActivity.this,task.getException().getMessage(),Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
+    }
+    private void sendSignInActivity()
+    {
+        Intent intent=new Intent(getApplicationContext(),RegisterActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        email.setText("");
+        password.setText("");
+        startActivity(intent);
     }
 }

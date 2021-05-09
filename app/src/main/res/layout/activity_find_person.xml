@@ -22,6 +22,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="20sp"
+                    android:inputType="text"
                     android:id="@+id/search_find_friend"
                     android:hint="Find User"
                     tools:ignore="HardcodedText"

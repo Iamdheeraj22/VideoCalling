@@ -3,6 +3,7 @@ package com.example.videocalling;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,10 +23,10 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class Contact_activity extends AppCompatActivity {
 
     CircleImageView circleImageView;
-    TextView contactUsername,contactFullName,contactAbout,error;
+    TextView contactUsername,contactAbout,error;
     String receiverId="";
     DatabaseReference databaseReference;
-    String username,fullName,image,about;
+    String firstName,lastName,image,about;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,21 +45,22 @@ public class Contact_activity extends AppCompatActivity {
     {
         databaseReference.child(receiverId)
                 .addValueEventListener(new ValueEventListener() {
+                    @SuppressLint("SetTextI18n")
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if(snapshot.exists()){
-                            fullName=snapshot.child("fullname").getValue().toString();
+                            firstName=snapshot.child("firstname").getValue().toString();
+                            lastName=snapshot.child("lastname").getValue().toString();
                             image=snapshot.child("imageurl").getValue().toString();
-                            username=snapshot.child("username").getValue().toString();
-                            about=snapshot.child("about").getValue().toString();
+                            about=snapshot.child("bio").getValue().toString();
+
+                            contactUsername.setText(firstName+" "+lastName);
                         }
                         if(image.equals("default")){
                             circleImageView.setImageResource(R.drawable.person);
                         }else{
                             Glide.with(Contact_activity.this).load(image).into(circleImageView);
                         }
-                        contactUsername.setText(username);
-                        contactFullName.setText(fullName);
                         contactAbout.setText(about);
                         //Picasso.get().load(image).placeholder(R.drawable.person).into(imageView1);
                     }
@@ -67,7 +69,6 @@ public class Contact_activity extends AppCompatActivity {
                         error.setVisibility(View.VISIBLE);
                         circleImageView.setVisibility(View.VISIBLE);
                         contactUsername.setVisibility(View.VISIBLE);
-                        contactFullName.setVisibility(View.VISIBLE);
                         contactAbout.setVisibility(View.VISIBLE);
                     }
                 });
@@ -82,7 +83,6 @@ public class Contact_activity extends AppCompatActivity {
     private void initViews() {
         circleImageView=findViewById(R.id.contact_user_image);
         contactUsername=findViewById(R.id.contact_user_userName);
-        contactFullName=findViewById(R.id.contact_user_name);
         contactAbout=findViewById(R.id.contact_user_about);
         error=findViewById(R.id.error_textview);
     }

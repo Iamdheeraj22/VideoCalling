@@ -1,8 +1,9 @@
 package com.example.videocalling;
 
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -10,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -21,8 +21,12 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
+import com.example.videocalling.CallingHistory.CallHistory;
+import com.example.videocalling.CallingHistory.CallingDatabase;
+import com.example.videocalling.Classes.Contacts;
 import com.example.videocalling.databinding.ActivityMainBinding;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -36,31 +40,30 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.Calendar;
 
-import Classes.Contacts;
-import Classes.MyDatabaseHelper;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity {
 
     ImageView findPersonbtn;
     BottomNavigationView navView;
+    TextView currentUserName;
     RecyclerView myContactsList;
-    private ActivityMainBinding binding;
+    ActivityMainBinding binding;
     DatabaseReference contactsRef,userRef;
+    SwipeRefreshLayout swipeRefreshLayout;
     FirebaseAuth mAuth;
     String currentUserId;
-    String userName="",imageUrl="",status="",fullname="";
+    String imageUrl="",status="",firstName="",lastName="";
     String callBy="";
-    String currentUserIdName,currentIdUserName;
     FloatingActionButton featuresBtn,exitBtn,callHistoryBtn;
     Boolean isAllFloatingButtonVisible;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        setContentView(R.layout.activity_main);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         initViews();
@@ -69,11 +72,6 @@ public class MainActivity extends AppCompatActivity {
 
         //Call the NavigationView
         NavigationView();
-
-        mAuth=FirebaseAuth.getInstance();
-        contactsRef= FirebaseDatabase.getInstance().getReference().child("Contacts");
-        userRef=FirebaseDatabase.getInstance().getReference().child("Users");
-        currentUserId=mAuth.getCurrentUser().getUid();
 
         findPersonbtn=findViewById(R.id.image_contacts_btn);
         myContactsList=findViewById(R.id.contacts_list);
@@ -115,132 +113,23 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        clearCallingRinging();
         setOnlineAndOfflineStatus();
         checkForReceivingCall();
         validateUser();
         getInfromationOfCurrentUser();
-        FirebaseRecyclerOptions<Contacts> firebaseRecyclerOptions=
-                new FirebaseRecyclerOptions.Builder<Contacts>()
-                .setQuery(contactsRef.child(currentUserId),Contacts.class)
-                .build();
-
-        FirebaseRecyclerAdapter<Contacts,ContactsViewHolder> firebaseRecyclerAdapter=
-                new FirebaseRecyclerAdapter<Contacts, ContactsViewHolder>(firebaseRecyclerOptions) {
-                    @Override
-                    protected void onBindViewHolder(@NonNull ContactsViewHolder contactsViewHolder, int i, @NonNull Contacts contacts)
-                    {
-                        final String listUserId= getRef(i).getKey();
-                        assert listUserId != null;
-                        userRef.child(listUserId).addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot)
-                            {
-                                if(snapshot.exists())
-                                {
-                                    userName=snapshot.child("username").getValue().toString();
-                                    imageUrl=snapshot.child("imageurl").getValue().toString();
-                                    status=snapshot.child("status").getValue().toString();
-                                    fullname=snapshot.child("fullname").getValue().toString();
-                                    contactsViewHolder.contacts_username.setText(userName);
-
-                                    if (imageUrl.equals("default")){
-                                        contactsViewHolder.contacts_image.setImageResource(R.drawable.person);
-                                    }else{
-                                        Glide.with(MainActivity.this).load(imageUrl).into(contactsViewHolder.contacts_image);
-                                    }
-                                    //Picasso.get().load(imageUrl).into(contactsViewHolder.contacts_image);
-
-                                   if(status.equals("Online")){
-                                        contactsViewHolder.status_on.setVisibility(View.VISIBLE);
-                                        contactsViewHolder.status_off.setVisibility(View.GONE);
-                                    }else if (status.equals("Offline")){
-                                        contactsViewHolder.status_off.setVisibility(View.VISIBLE);
-                                        contactsViewHolder.status_on.setVisibility(View.GONE);
-                                    }else{
-                                       contactsViewHolder.status_off.setVisibility(View.VISIBLE);
-                                       contactsViewHolder.status_on.setVisibility(View.GONE);
-                                   }
-                                }
-                                contactsViewHolder.calling_btn.setOnClickListener(new View.OnClickListener()
-                                {
-                                    @Override
-                                    public void onClick(View v)
-                                    {
-                                        userRef.child(listUserId).addValueEventListener(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(@NonNull DataSnapshot snapshot)
-                                            {
-                                                if(snapshot.exists())
-                                                {
-                                                    @SuppressLint("SimpleDateFormat")
-                                                    String currentDate = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
-                                                    status=snapshot.child("status").getValue().toString();
-                                                    MyDatabaseHelper myDatabaseHelper=new MyDatabaseHelper(MainActivity.this);
-                                                    if(status.equals("Online"))
-                                                    {
-                                                        myDatabaseHelper.addCallingHistory(currentIdUserName,userName,fullname,listUserId,currentDate);
-                                                        Intent intent=new Intent(MainActivity.this,calling_activity.class);
-                                                        intent.putExtra("visit_user_id",listUserId);
-                                                        startActivity(intent);
-                                                    }
-                                                    if(status.equals("Offline"))
-                                                    {
-                                                        AlertDialog.Builder alertDialog=new AlertDialog.Builder(MainActivity.this);
-                                                        alertDialog.setMessage("User currently offline")
-                                                                .setCancelable(false)
-                                                                .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
-                                                                    public void onClick(DialogInterface dialog, int id) {
-                                                                        Toast.makeText(MainActivity.this, "Try after some time...", Toast.LENGTH_SHORT).show();
-                                                                    }
-                                                                });
-                                                        AlertDialog alert = alertDialog.create();
-                                                        alert.setTitle("Alert!");
-                                                        alert.show();
-                                                    }
-                                                }
-                                            }
-                                            @Override
-                                            public void onCancelled(@NonNull DatabaseError error) {
-                                            }
-                                        });
-                                    }
-                                });
-                            }
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-                                Toast.makeText(MainActivity.this,error.toException().getMessage(),Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                        contactsViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Intent intent=new Intent(MainActivity.this,Contact_activity.class);
-                                intent.putExtra("contact",listUserId);
-                                startActivity(intent);
-                            }
-                        });
-                    }
-                    @NonNull
-                    @Override
-                    public ContactsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                        View view= LayoutInflater.from(parent.getContext()).inflate(R.layout.contacts_design,parent,false);
-                        MainActivity.ContactsViewHolder viewHolder=new ContactsViewHolder(view);
-                        return viewHolder;
-                    }
-                };
-        myContactsList.setAdapter(firebaseRecyclerAdapter);
-        firebaseRecyclerAdapter.startListening();
+        getContacts();
     }
 
     //get the current user information
     private void getInfromationOfCurrentUser()
     {
         userRef.child(currentUserId).addValueEventListener(new ValueEventListener() {
+            @SuppressLint("SetTextI18n")
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.exists()){
-                    currentIdUserName=snapshot.child("username").getValue().toString();
-                    currentUserIdName=snapshot.child("fullname").getValue().toString();
+                    currentUserName.setText("Hii "+snapshot.child("firstname").getValue().toString()+" "+snapshot.child("lastname").getValue().toString());
                 }
             }
             @Override
@@ -265,19 +154,17 @@ public class MainActivity extends AppCompatActivity {
     public static class ContactsViewHolder extends RecyclerView.ViewHolder
     {
         ImageView contacts_image;
-        TextView contacts_username;
-        ImageButton calling_btn;
+        TextView contacts_username,textView_status;
+        CircleImageView calling_btn;
         RelativeLayout relativeLayout;
-        CircleImageView status_on,status_off;
         public ContactsViewHolder(@NonNull View itemView)
         {
             super(itemView);
+            textView_status=itemView.findViewById(R.id.status_activity);
             contacts_image=itemView.findViewById(R.id.contacts_image);
             contacts_username=itemView.findViewById(R.id.contacts_username);
             relativeLayout=itemView.findViewById(R.id.contacts_cardView);
             calling_btn=itemView.findViewById(R.id.calling_btn);
-            status_on=itemView.findViewById(R.id.status_on);
-            status_off=itemView.findViewById(R.id.status_off);
         }
     }
     //Check the receiving Call
@@ -344,12 +231,7 @@ public class MainActivity extends AppCompatActivity {
     {
         finish();
         Handler handler=new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                startActivity(getIntent());
-            }
-        },1000);
+        handler.postDelayed(() -> startActivity(getIntent()),1000);
     }
 
     //initialize the widgets
@@ -358,9 +240,16 @@ public class MainActivity extends AppCompatActivity {
         featuresBtn=findViewById(R.id.features_app);
         callHistoryBtn=findViewById(R.id.call_historyBtn);
         exitBtn=findViewById(R.id.exit_app);
+        swipeRefreshLayout=findViewById(R.id.swipeRefreshLayout);
+        currentUserName=findViewById(R.id.userId_name);
         isAllFloatingButtonVisible=false;
         callHistoryBtn.hide();
         exitBtn.hide();
+        swipeRefreshLayout.setOnRefreshListener(this::getContacts);
+        mAuth=FirebaseAuth.getInstance();
+        contactsRef= FirebaseDatabase.getInstance().getReference().child("Contacts");
+        userRef=FirebaseDatabase.getInstance().getReference().child("Users");
+        currentUserId=mAuth.getCurrentUser().getUid();
     }
 
     //Processing of the navigation View
@@ -383,17 +272,13 @@ public class MainActivity extends AppCompatActivity {
                     AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
                     alertDialog.setMessage("Do you want to logout your account?")
                             .setCancelable(false)
-                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    FirebaseAuth.getInstance().signOut();
-                                    startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                                }
+                            .setPositiveButton("Yes", (dialog, id) -> {
+                                FirebaseAuth.getInstance().signOut();
+                                startActivity(new Intent(MainActivity.this, LoginActivity.class));
                             })
-                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    //  Action for 'NO' Button
-                                    dialog.cancel();
-                                }
+                            .setNegativeButton("No", (dialog, id) -> {
+                                //  Action for 'NO' Button
+                                dialog.cancel();
                             });
                     AlertDialog alert = alertDialog.create();
                     alert.setTitle("Account Logout!");
@@ -401,6 +286,177 @@ public class MainActivity extends AppCompatActivity {
                     return true;
             }
             return false;
+        });
+    }
+
+    //Get all Contacts from firebase database
+    private void getContacts()
+    {
+        swipeRefreshLayout.setRefreshing(true);
+        FirebaseRecyclerOptions<Contacts> firebaseRecyclerOptions=
+                new FirebaseRecyclerOptions.Builder<Contacts>()
+                        .setQuery(contactsRef.child(currentUserId),Contacts.class)
+                        .build();
+
+        FirebaseRecyclerAdapter<Contacts,ContactsViewHolder> firebaseRecyclerAdapter=
+                new FirebaseRecyclerAdapter<Contacts, ContactsViewHolder>(firebaseRecyclerOptions) {
+                    @Override
+                    protected void onBindViewHolder(@NonNull ContactsViewHolder contactsViewHolder, int i, @NonNull Contacts contacts)
+                    {
+                        swipeRefreshLayout.setRefreshing(false);
+                        final String listUserId= getRef(i).getKey();
+                        assert listUserId != null;
+                        userRef.child(listUserId).addValueEventListener(new ValueEventListener() {
+                            @SuppressLint("SetTextI18n")
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot)
+                            {
+                                if(snapshot.exists())
+                                {
+                                    imageUrl=snapshot.child("imageurl").getValue().toString();
+                                    status=snapshot.child("status").getValue().toString();
+                                    firstName=snapshot.child("firstname").getValue().toString();
+                                    lastName=snapshot.child("lastname").getValue().toString();
+
+                                    contactsViewHolder.contacts_username.setText(firstName+" "+lastName);
+
+                                    if (imageUrl.equals("default")){
+                                        contactsViewHolder.contacts_image.setImageResource(R.drawable.person);
+                                    }else{
+                                        Glide.with(MainActivity.this).load(imageUrl).into(contactsViewHolder.contacts_image);
+                                    }
+                                    //Picasso.get().load(imageUrl).into(contactsViewHolder.contacts_image);
+
+                                    if(status.equals("Online")){
+                                        contactsViewHolder.textView_status.setText("Online");
+                                        contactsViewHolder.textView_status.setTextColor(Color.GREEN);
+                                    }else if (status.equals("Offline")){
+                                        contactsViewHolder.textView_status.setText("Offline");
+                                        contactsViewHolder.textView_status.setTextColor(Color.BLACK);
+                                    }else{
+                                        contactsViewHolder.textView_status.setText("Offline");
+                                        contactsViewHolder.textView_status.setTextColor(Color.BLACK);
+                                    }
+                                }
+                                contactsViewHolder.calling_btn.setOnClickListener(v ->
+                                        userRef.child(listUserId).addValueEventListener(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot snapshot1)
+                                            {
+                                                if(snapshot1.exists())
+                                                {
+                                                    status= snapshot1.child("status").getValue().toString();
+                                                    if(status.equals("Online"))
+                                                    {
+                                                        addHistory(currentUserId,listUserId);
+                                                        Intent intent=new Intent(MainActivity.this,calling_activity.class);
+                                                        intent.putExtra("visit_user_id",listUserId);
+                                                        startActivity(intent);
+                                                    }
+                                                    if(status.equals("Offline"))
+                                                    {
+                                                        AlertDialog.Builder alertDialog=new AlertDialog.Builder(MainActivity.this);
+                                                        alertDialog.setMessage("User currently offline")
+                                                                .setCancelable(false)
+                                                                .setPositiveButton("Okay", (dialog, id) -> Toast.makeText(MainActivity.this, "Try after some time...", Toast.LENGTH_SHORT).show());
+                                                        AlertDialog alert = alertDialog.create();
+                                                        alert.setTitle("Alert!");
+                                                        alert.show();
+                                                    }
+                                                }
+                                            }
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+                                            }
+                                        }));
+                            }
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+                                Toast.makeText(MainActivity.this,error.toException().getMessage(),Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                        contactsViewHolder.itemView.setOnClickListener(v -> {
+                            Intent intent=new Intent(MainActivity.this,Contact_activity.class);
+                            intent.putExtra("contact",listUserId);
+                            startActivity(intent);
+                        });
+                    }
+                    @NonNull
+                    @Override
+                    public ContactsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                        View view= LayoutInflater.from(parent.getContext()).inflate(R.layout.contacts_design,parent,false);
+                        return new ContactsViewHolder(view);
+                    }
+                };
+        myContactsList.setAdapter(firebaseRecyclerAdapter);
+        firebaseRecyclerAdapter.startListening();
+    }
+
+    //Add the calling history
+    @SuppressLint("SimpleDateFormat")
+    private void addHistory(String senderId, String receiverId)
+    {
+        Calendar calendar;
+        SimpleDateFormat simpledateformat;
+        calendar = Calendar.getInstance();
+        simpledateformat = new SimpleDateFormat("dd-MM-yyyy");
+        String Date = simpledateformat.format(calendar.getTime());
+        class SaveTask extends AsyncTask<Void, Void, Void> {
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                //creating a task
+                CallHistory history = new CallHistory();
+                history.setReceiverid(receiverId);
+                history.setDate(Date);
+                //adding to database
+                CallingDatabase.getInstance(getApplicationContext()).getAppDatabase()
+                        .historyDao()
+                        .insertTask(history);
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                Toast.makeText(getApplicationContext(), "Call Saved", Toast.LENGTH_LONG).show();
+            }
+        }
+
+        SaveTask st = new SaveTask();
+        st.execute();
+    }
+
+    private void clearCallingRinging()
+    {
+            userRef.child(currentUserId).child("Ringing").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()){
+                        userRef.child(currentUserId).child("Ringing").removeValue();
+                    }else{
+                        Toast.makeText(MainActivity.this, "Sorry user have not receive call from anyone..", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        userRef.child(currentUserId).child("Calling").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()){
+                    userRef.child(currentUserId).child("Calling").removeValue();
+                }else{
+                    Toast.makeText(MainActivity.this, "Sorry user not call to anyone..", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
     }
 }

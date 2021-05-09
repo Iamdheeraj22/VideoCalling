@@ -1,8 +1,6 @@
 package com.example.videocalling;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -11,8 +9,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -27,10 +26,9 @@ public class calling_activity extends AppCompatActivity
 {
     ImageView profile_image,accept_Call_btn,end_Call_btn;
     TextView userName;
-    String receiverUserId="",receiverUserImage="",receiverUserName="";
-    String senderUserId="",senderUserImage="",senderUserName="",checker="";
+    String receiverUserId="",receiverUserImage="",receiverUserfirstName="",receiverUserLastName="";
+    String senderUserId="",senderUserImage="",senderUserFirstName="",checker="",senderUserLastName="";
     DatabaseReference userRef;
-    String callingId="",ringingId="";
     MediaPlayer mediaPlayer;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,35 +46,24 @@ public class calling_activity extends AppCompatActivity
         receiverUserId=getIntent().getExtras().get("visit_user_id").toString();
         userRef= FirebaseDatabase.getInstance().getReference().child("Users");
 
-        end_Call_btn.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                mediaPlayer.stop();
-                checker="";
-                CancelUSerCalling();
-            }
+        end_Call_btn.setOnClickListener(v -> {
+            mediaPlayer.stop();
+            checker="";
+            CancelUSerCalling();
         });
-        accept_Call_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mediaPlayer.stop();
-                 final HashMap<String,Object> callingPickMap=new HashMap<>();
-                 callingPickMap.put("picked","picked");
+        accept_Call_btn.setOnClickListener(v -> {
+            mediaPlayer.stop();
+             final HashMap<String,Object> callingPickMap=new HashMap<>();
+             callingPickMap.put("picked","picked");
 
-                 userRef.child(senderUserId).child("Ringing")
-                         .updateChildren(callingPickMap)
-                         .addOnCompleteListener(new OnCompleteListener<Void>() {
-                             @Override
-                             public void onComplete(@NonNull Task<Void> task) {
-                                 if(task.isComplete()){
-                                     Intent intent=new Intent(calling_activity.this,videoCallActivity.class);
-                                     startActivity(intent);
-                                 }
-                             }
-                         });
-            }
+             userRef.child(senderUserId).child("Ringing")
+                     .updateChildren(callingPickMap)
+                     .addOnCompleteListener(task -> {
+                         if(task.isComplete()){
+                             Intent intent=new Intent(calling_activity.this,videoCallActivity.class);
+                             startActivity(intent);
+                         }
+                     });
         });
         getAndSetReceiverInformation();
     }
@@ -139,19 +126,22 @@ public class calling_activity extends AppCompatActivity
     private void getAndSetReceiverInformation()
     {
         userRef.addValueEventListener(new ValueEventListener() {
+            @SuppressLint("SetTextI18n")
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.child(receiverUserId).exists()){
                     receiverUserImage=snapshot.child(receiverUserId).child("imageurl").getValue().toString();
-                    receiverUserName=snapshot.child(receiverUserId).child("username").getValue().toString();
+                    receiverUserfirstName=snapshot.child(receiverUserId).child("firstname").getValue().toString();
+                    receiverUserLastName=snapshot.child(receiverUserId).child("firstname").getValue().toString();
 
-                    userName.setText(receiverUserName);
+                    userName.setText(receiverUserfirstName+" "+receiverUserLastName);
                     Picasso.get().load(receiverUserImage).placeholder(R.drawable.person).into(profile_image);
                 }
                 if(snapshot.child(senderUserId).exists())
                 {
                     senderUserImage=snapshot.child(senderUserId).child("imageurl").getValue().toString();
-                    senderUserName=snapshot.child(senderUserId).child("username").getValue().toString();
+                    senderUserFirstName=snapshot.child(senderUserId).child("firstname").getValue().toString();
+                    senderUserLastName=snapshot.child(senderUserId).child("lastname").getValue().toString();
                 }
             }
             @Override
@@ -163,29 +153,23 @@ public class calling_activity extends AppCompatActivity
     private void CancelUSerCalling()
     {
         userRef.child(senderUserId).child("Calling")
-                .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if(task.isSuccessful()){
-                    userRef.child(receiverUserId).child("Ringing")
-                            .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task)
-                        {
-                            if (task.isSuccessful())
-                            {
-                                startActivity(new Intent(calling_activity.this,MainActivity.class));
-                                finish();
-                            }
-                        }
-                    });
-                }else {
-                    startActivity(new Intent(calling_activity.this,MainActivity.class));
-                    finish();
-                }
-            }
-        });
-      /*  //sender side
+                .removeValue().addOnCompleteListener(task -> {
+                    if(task.isSuccessful()){
+                        userRef.child(receiverUserId).child("Ringing")
+                                .removeValue().addOnCompleteListener(task1 -> {
+                                    if (task1.isSuccessful())
+                                    {
+                                        startActivity(new Intent(calling_activity.this,MainActivity.class));
+                                        finish();
+                                    }
+                                });
+                    }else {
+                        startActivity(new Intent(calling_activity.this,MainActivity.class));
+                        finish();
+                    }
+                });
+        /*
+        //sender side
         userRef.child(senderUserId).child("Calling")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -263,25 +247,8 @@ public class calling_activity extends AppCompatActivity
                     public void onCancelled(@NonNull DatabaseError error) {
                         Toast.makeText(calling_activity.this, error.toException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
-                });*/
-        userRef.child(senderUserId).child("Ringing")
-                .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if(task.isSuccessful()){
-                    userRef.child(receiverUserId).child("Calling")
-                            .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if(task.isSuccessful())
-                            {
-                                startActivity(new Intent(calling_activity.this,MainActivity.class));
-                                finish();
-                            }
-                        }
-                    });
-                }
-            }
-        });
+                });
+
+         */
     }
 }

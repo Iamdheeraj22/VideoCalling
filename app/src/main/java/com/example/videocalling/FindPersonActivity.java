@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,7 +15,6 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -25,12 +25,12 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.squareup.picasso.Picasso;
 
-import Classes.Contacts;
+import java.util.Objects;
+
+import com.example.videocalling.Classes.Contacts;
 
 public class  FindPersonActivity extends AppCompatActivity {
 
@@ -78,24 +78,25 @@ public class  FindPersonActivity extends AppCompatActivity {
         if(str.equals(""))
         {
             contactsFirebaseRecyclerOptions=new FirebaseRecyclerOptions.Builder<Contacts>()
-                            .setQuery(databaseReference,Contacts.class)
-                            .build();
+                    .setQuery(databaseReference,Contacts.class)
+                    .build();
         }
         if(!str.equals("")){
             contactsFirebaseRecyclerOptions=new FirebaseRecyclerOptions.Builder<Contacts>()
-                    .setQuery(databaseReference.orderByChild("username")
+                    .setQuery(databaseReference.orderByChild("firstname")
                                     .startAt(str)
-                                    .endAt(str+"\uf8ff")
+                                        .endAt(str+"\uf8ff")
                             ,Contacts.class)
                     .build();
         }
 
         FirebaseRecyclerAdapter<Contacts,FindFriendHolder> firebaseRecyclerAdapter=
-                new FirebaseRecyclerAdapter<Contacts, FindFriendHolder>(contactsFirebaseRecyclerOptions) {
+                new FirebaseRecyclerAdapter<Contacts, FindFriendHolder>(Objects.requireNonNull(contactsFirebaseRecyclerOptions)) {
+                    @SuppressLint("SetTextI18n")
                     @Override
                     protected void onBindViewHolder(@NonNull FindFriendHolder findFriendHolder, int position, @NonNull Contacts model)
                     {
-                        findFriendHolder.contacts_username.setText(model.getUsername());
+                        findFriendHolder.contacts_username.setText(model.getFirstname()+" "+model.getLastname());
                         if(model.getImageurl().equals("default")){
                             findFriendHolder.contacts_image.setImageResource(R.drawable.person);
                         }else {
@@ -110,7 +111,7 @@ public class  FindPersonActivity extends AppCompatActivity {
                                 Intent intent=new Intent(FindPersonActivity.this,UserProfileActivity.class);
                                 intent.putExtra("visit_user_id",visit_user_id);
                                 intent.putExtra("profile_image",model.getImageurl());
-                                intent.putExtra("profile_name",model.getUsername());
+                                intent.putExtra("profile_name",model.getFirstname()+" "+model.getLastname());
                                 startActivity(intent);
                             }
                         });

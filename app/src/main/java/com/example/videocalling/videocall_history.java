@@ -4,59 +4,57 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.database.Cursor;
+import android.annotation.SuppressLint;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.widget.Toast;
 
-import java.util.ArrayList;
+import java.util.List;
 
-import Classes.MyDatabaseHelper;
-import Classes.callHistoryAdapter;
+import com.example.videocalling.CallingHistory.CallHistory;
+import com.example.videocalling.CallingHistory.CallingDatabase;
+import com.example.videocalling.CallingHistory.CallingHistoryAdapter;
 
 public class videocall_history extends AppCompatActivity {
 
     RecyclerView recyclerView;
-    callHistoryAdapter callHistoryAdapter;
-    MyDatabaseHelper myDatabaseHelper;
-    ArrayList<String> callById,username,fullname,receiver_id,date;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_videocall_history);
 
-        recyclerView=findViewById(R.id.call_history_recyclerView);
-
-        myDatabaseHelper=new MyDatabaseHelper(this);
-        callById=new ArrayList<>();
-        username=new ArrayList<>();
-        fullname=new ArrayList<>();
-        receiver_id=new ArrayList<>();
-        date=new ArrayList<>();
-
-        storeDataInArrays();
-
-        callHistoryAdapter=new callHistoryAdapter(videocall_history.this,this,callById,username,fullname,receiver_id,date);
-        recyclerView.setAdapter(callHistoryAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(videocall_history.this));
-
-
+        recyclerView = findViewById(R.id.call_history_recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
-    private void storeDataInArrays()
+    @Override
+    protected void onStart() {
+        super.onStart();
+        getTasks();
+    }
+
+    private void getTasks()
     {
-        Cursor cursor=myDatabaseHelper.readAllData();
-        if(cursor.getCount()==0)
-        {
-            Toast.makeText(this, "No Data!", Toast.LENGTH_SHORT).show();
-        }else{
-            while (cursor.moveToNext())
-            {
-                callById.add(cursor.getString(0));
-                username.add(cursor.getString(1));
-                fullname.add(cursor.getString(2));
-                receiver_id.add(cursor.getString(3));
-                date.add(cursor.getString(4));
+        @SuppressLint("StaticFieldLeak")
+        class GetTasks extends AsyncTask<Void, Void, List<CallHistory>> {
+
+            @Override
+            protected List<CallHistory> doInBackground(Void... voids) {
+                List<CallHistory> historyList = CallingDatabase
+                        .getInstance(getApplicationContext())
+                        .getAppDatabase()
+                        .historyDao()
+                        .getAll();
+                return historyList;
+            }
+
+            @Override
+            protected void onPostExecute(List<CallHistory> histories) {
+                super.onPostExecute(histories);
+                CallingHistoryAdapter adapter = new CallingHistoryAdapter(getApplicationContext(), histories);
+                recyclerView.setAdapter(adapter);
             }
         }
+        GetTasks gt = new GetTasks();
+        gt.execute();
     }
 }

@@ -8,66 +8,106 @@
     android:background="#AFD3E3"
     tools:context=".ForgetActivity">
 
-
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="407dp"
-        android:layout_height="506dp"
-        android:layout_marginBottom="100dp"
-        android:background="@drawable/white_button"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent">
-
-
-        <EditText
-            android:id="@+id/forget_email"
-            android:layout_width="234dp"
-            android:layout_height="52dp"
-            android:background="@drawable/state_change"
-            android:drawableStart="@drawable/email_select"
-            android:drawablePadding="12dp"
-            android:ems="10"
-            android:hint="Please enter your email"
-            android:importantForAutofill="no"
-            android:inputType="textEmailAddress"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.497"
-            app:layout_constraintStart_toStartOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:ignore="MissingConstraints">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:id="@+id/linearHeader"
+            android:background="@color/design_default_color_primary"
+            android:gravity="center"
+            android:orientation="vertical"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.544"
-            tools:ignore="HardcodedText,LabelFor" />
+            android:layout_height="200dp">
 
-        <Button
-            android:id="@+id/forget_submit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/black_button"
-            android:backgroundTint="#070707"
-            android:text="Submit"
-            app:iconTint="#151515"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.722"
-            tools:ignore="HardcodedText" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/forget_password_activity"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:textColor="@color/white"/>
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/textView"
-            android:layout_width="315dp"
-            android:layout_height="75dp"
-            android:text="Enter your email address and we'll send you a link to reset your password!"
-            android:textAlignment="center"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.493"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/forget_your_password"
+            android:textColor="@color/black"
+            android:includeFontPadding="false"
+            android:id="@+id/signInHeader"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.332"
-            tools:ignore="HardcodedText" />
+            app:layout_constraintTop_toBottomOf="@id/linearHeader"
+            android:layout_marginTop="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:id="@+id/cardSignIn"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
+            app:cardCornerRadius="4dp"
+            app:layout_constraintTop_toBottomOf="@id/signInHeader">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="4dp"
+                tools:ignore="SmallSp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginTop="8dp"
+                    android:includeFontPadding="false"
+                    android:textColor="@color/design_default_color_primary"
+                    android:text="@string/email"
+                    android:textSize="14sp"/>
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginStart="5dp"
+                    android:id="@+id/inputForgetEmail"
+                    android:hint="@string/you_example_com"
+                    android:imeOptions="actionNext"
+                    android:importantForAutofill="no"
+                    android:includeFontPadding="false"
+                    android:inputType="textEmailAddress"
+                    android:textColorHint="@color/black"
+                    android:textSize="17sp"
+                    android:layout_marginLeft="5dp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:id="@+id/buttonForgetPassword"
+            app:layout_constraintTop_toBottomOf="@id/cardSignIn"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginStart="20dp"
+            android:includeFontPadding="false"
+            android:textSize="16sp"
+            android:text="@string/send_reset_password_link"/>
+        <ProgressBar
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:id="@+id/signInProgressBar"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/buttonForgetPassword"
+            app:layout_constraintStart_toStartOf="@id/buttonForgetPassword"
+            app:layout_constraintEnd_toEndOf="@id/buttonForgetPassword"
+            app:layout_constraintTop_toTopOf="@id/buttonForgetPassword"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

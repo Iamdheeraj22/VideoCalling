@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_marginTop="5dp"
     android:paddingTop="10dp">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:cardCornerRadius="20dp"
         android:backgroundTint="#B0C7CA">
         <de.hdodenhof.circleimageview.CircleImageView
             android:layout_width="85dp"
@@ -25,22 +26,14 @@
             android:text="Name"
             tools:ignore="HardcodedText"
             android:layout_marginStart="100dp"
-            android:id="@+id/call_history_item_name"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Username"
-            tools:ignore="HardcodedText"
-            android:layout_marginTop="40dp"
-            android:layout_marginStart="100dp"
-            android:id="@+id/call_history_item_username"/>
+            android:id="@+id/callSenderName"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Call by:"
             android:textStyle="bold"
             tools:ignore="HardcodedText"
-            android:layout_marginTop="37dp"
+            android:layout_marginTop="10dp"
             android:layout_marginStart="250dp"
             android:id="@+id/call_history_item_callByHeading"/>
         <TextView
@@ -48,8 +41,8 @@
             android:layout_height="wrap_content"
             android:text="Username"
             tools:ignore="HardcodedText"
-            android:id="@+id/call_history_item_callBy"
-            android:layout_marginTop="37dp"
+            android:id="@+id/callReceiverName"
+            android:layout_marginTop="10dp"
             android:layout_marginStart="310dp"/>
         <TextView
             android:layout_width="wrap_content"
@@ -58,7 +51,7 @@
             android:textStyle="bold"
             tools:ignore="HardcodedText"
             android:id="@+id/call_history_date_heading"
-            android:layout_marginTop="60dp"
+            android:layout_marginTop="40dp"
             android:layout_marginStart="250dp"/>
         <TextView
             android:layout_width="wrap_content"
@@ -66,7 +59,7 @@
             android:text=""
             tools:ignore="HardcodedText"
             android:id="@+id/call_history_item_date"
-            android:layout_marginTop="60dp"
+            android:layout_marginTop="40dp"
             android:layout_marginStart="310dp"/>
     </androidx.cardview.widget.CardView>
 
