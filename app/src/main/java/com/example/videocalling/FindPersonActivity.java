@@ -32,14 +32,18 @@ import java.util.Objects;
 
 import com.example.videocalling.Classes.Contacts;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class  FindPersonActivity extends AppCompatActivity {
 
     EditText search_find_friend;
     RecyclerView find_friends_list;
     String str="";
+    CircleImageView circleImageView;
     DatabaseReference databaseReference;
 
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +51,7 @@ public class  FindPersonActivity extends AppCompatActivity {
 
         search_find_friend=findViewById(R.id.search_find_friend);
         find_friends_list=findViewById(R.id.find_friends_list);
+        circleImageView=findViewById(R.id.search_btn);
         find_friends_list.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         databaseReference= FirebaseDatabase.getInstance().getReference().child("Users");
         search_find_friend.addTextChangedListener(new TextWatcher() {
@@ -68,12 +73,14 @@ public class  FindPersonActivity extends AppCompatActivity {
             }
         });
 
+        circleImageView.setOnClickListener(v -> {
+            serachUser();
+        });
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    @Override
-    protected void onStart() {
-        super.onStart();
+    private void serachUser(){
         FirebaseRecyclerOptions<Contacts> contactsFirebaseRecyclerOptions=null;
         if(str.equals(""))
         {
@@ -85,7 +92,7 @@ public class  FindPersonActivity extends AppCompatActivity {
             contactsFirebaseRecyclerOptions=new FirebaseRecyclerOptions.Builder<Contacts>()
                     .setQuery(databaseReference.orderByChild("firstname")
                                     .startAt(str)
-                                        .endAt(str+"\uf8ff")
+                                    .endAt(str+"\uf8ff")
                             ,Contacts.class)
                     .build();
         }
@@ -129,12 +136,11 @@ public class  FindPersonActivity extends AppCompatActivity {
         find_friends_list.setAdapter(firebaseRecyclerAdapter);
         firebaseRecyclerAdapter.startListening();
     }
-
     public static class FindFriendHolder extends RecyclerView.ViewHolder
     {
         ImageView contacts_image;
         TextView contacts_username;
-        ImageButton calling_btn;
+        CircleImageView calling_btn;
         RelativeLayout relativeLayout;
         public FindFriendHolder(@NonNull View itemView)
         {
@@ -146,4 +152,5 @@ public class  FindPersonActivity extends AppCompatActivity {
             calling_btn.setVisibility(View.GONE);
         }
     }
+
 }

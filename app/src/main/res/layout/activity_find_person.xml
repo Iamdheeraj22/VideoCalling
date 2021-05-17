@@ -26,10 +26,23 @@
                     android:id="@+id/search_find_friend"
                     android:hint="Find User"
                     tools:ignore="HardcodedText"
+                    android:layout_marginEnd="100dp"
                     android:layout_marginTop="8sp"
                     android:drawableStart="@drawable/search"
                     android:importantForAutofill="no"
                     android:layout_marginBottom="5dp"/>
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/background_accept_invitation"
+                    android:id="@+id/search_btn"
+                    android:src="@drawable/search"
+                    android:layout_alignParentEnd="true"
+                    android:padding="10dp"
+                    android:backgroundTint="#87B189"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginTop="5dp"
+                    tools:ignore="ContentDescription" />
             </RelativeLayout>
         </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>

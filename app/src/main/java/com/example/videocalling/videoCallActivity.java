@@ -1,4 +1,4 @@
- package com.example.videocalling;
+package com.example.videocalling;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -36,12 +36,12 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 public class videoCallActivity extends AppCompatActivity implements Session.SessionListener, PublisherKit.PublisherListener
 {
-    private final static String API_key="47147804";
+    private final static String API_key="47231264";
     String callingId="",ringingId="";
     String senderUserId="";
 
-    private final static String SESSION_ID="2_MX40NzE0NzgwNH5-MTYxNDg1NjA1MzQwNH5HeGhLWnlyM2srQWZDUVhVTkRvcXRHUmp-fg";
-    private final static String TOKEN="T1==cGFydG5lcl9pZD00NzE0NzgwNCZzaWc9NmUwMTM5N2NjMGE4Y2RmZTdlMTVhYzE4NzJjY2Q4OGFkMTJlNDc4MTpzZXNzaW9uX2lkPTJfTVg0ME56RTBOemd3Tkg1LU1UWXhORGcxTmpBMU16UXdOSDVIZUdoTFdubHlNMnNyUVdaRFVWaFZUa1J2Y1hSSFVtcC1mZyZjcmVhdGVfdGltZT0xNjE0ODU2MTI5Jm5vbmNlPTAuNDY5ODEzNTI0MzQxNTY2NjUmcm9sZT1wdWJsaXNoZXImZXhwaXJlX3RpbWU9MTYxNzQ0NDUyNyZpbml0aWFsX2xheW91dF9jbGFzc19saXN0PQ==";
+    private final static String SESSION_ID="1_MX40NzIzMTI2NH5-MTYyMTI0ODU0MDE1Mn41RzA1Tk1SZ1ZXZ3ZLME9lZ3gvUUcxOTl-fg";
+    private final static String TOKEN="T1==cGFydG5lcl9pZD00NzIzMTI2NCZzaWc9NTAwNDI0YjM1YTFlOGNlNzAxZTEzNTExMjY3OWY0Y2RjYzVjZWRlZjpzZXNzaW9uX2lkPTFfTVg0ME56SXpNVEkyTkg1LU1UWXlNVEkwT0RVME1ERTFNbjQxUnpBMVRrMVNaMVpYWjNaTE1FOWxaM2d2VVVjeE9UbC1mZyZjcmVhdGVfdGltZT0xNjIxMjQ4NTU4Jm5vbmNlPTAuOTA5MTQwNzY5MDkwNDM4MSZyb2xlPXB1Ymxpc2hlciZleHBpcmVfdGltZT0xNjIzODQwNTU3JmluaXRpYWxfbGF5b3V0X2NsYXNzX2xpc3Q9";
     private static final String LOG_TAG=videoCallActivity.class.getSimpleName();
     private static final int RC_VIDEO_APP_PERMISSION=124;
     DatabaseReference usersRef;
@@ -236,83 +236,7 @@ public class videoCallActivity extends AppCompatActivity implements Session.Sess
     protected void onDestroy() {
         super.onDestroy();
         //sender side
-        usersRef.child(senderUserId).child("Calling")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot)
-                    {
-                        if(snapshot.exists() && snapshot.hasChild("calling"))
-                        {
-                            callingId=snapshot.child("calling").getValue().toString();
-                            usersRef.child(callingId).child("Ringing")
-                                    .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task)
-                                {
-                                    if(task.isSuccessful()){
-                                        usersRef.child(senderUserId).child("Calling")
-                                                .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task)
-                                            {
-                                                if(task.isSuccessful()){
-                                                    startActivity(new Intent(videoCallActivity.this,MainActivity.class));
-                                                    finish();
-                                                }
-                                            }
-                                        });
-                                    }
-                                }
-                            });
-                        }else {
-                            startActivity(new Intent(videoCallActivity.this,MainActivity.class));
-                            finish();
-                        }
-                    }
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Toast.makeText(videoCallActivity.this, error.toException().getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-        //Receiver side
-        usersRef.child(senderUserId).child("Ringing")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot)
-                    {
-                        if(snapshot.exists() && snapshot.hasChild("ringing"))
-                        {
-                            ringingId=snapshot.child("ringing").getValue().toString();
-                            usersRef.child(ringingId).child("Calling")
-                                    .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task)
-                                {
-                                    if(task.isSuccessful()){
-                                        usersRef.child(senderUserId).child("Ringing")
-                                                .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task)
-                                            {
-                                                if(task.isSuccessful()){
-                                                    startActivity(new Intent(videoCallActivity.this,MainActivity.class));
-                                                    finish();
-                                                }
-                                            }
-                                        });
-                                    }
-                                }
-                            });
-                        }else {
-                            startActivity(new Intent(videoCallActivity.this,MainActivity.class));
-                            finish();
-                        }
-                    }
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Toast.makeText(videoCallActivity.this, error.toException().getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+        startActivity(new Intent(videoCallActivity.this,MainActivity.class));
+        finish();
     }
 }

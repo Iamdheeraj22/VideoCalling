@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.videocalling.R;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -45,8 +46,9 @@ public class CallingHistoryAdapter extends RecyclerView.Adapter<CallingHistoryAd
         //Sender Information
         databaseReference= FirebaseDatabase.getInstance().getReference().child("Users");
         CallHistory callHistory=callHistoryList.get(position);
+        String currentId= FirebaseAuth.getInstance().getCurrentUser().getUid();
         holder.textViewCallDate.setText(callHistory.getDate());
-        databaseReference.child(callHistory.getSenderId()).addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.child(currentId).addListenerForSingleValueEvent(new ValueEventListener() {
             @SuppressLint("SetTextI18n")
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {

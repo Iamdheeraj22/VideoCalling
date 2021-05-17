@@ -18,8 +18,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.VideoCalling">
         <activity android:name=".videocall_history"/>
-        <activity android:name=".Contact_activity" />
-        <activity android:name=".AboutUs" />
+        <activity android:name=".Contact_activity"
+            android:parentActivityName=".MainActivity"/>
+        <activity android:name=".ContactUs"
+            android:parentActivityName=".MainActivity"/>
         <activity android:name=".videoCallActivity"
             android:parentActivityName=".MainActivity"/>
         <activity android:name=".calling_activity" />

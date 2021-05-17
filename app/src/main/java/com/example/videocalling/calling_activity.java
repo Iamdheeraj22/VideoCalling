@@ -53,17 +53,18 @@ public class calling_activity extends AppCompatActivity
         });
         accept_Call_btn.setOnClickListener(v -> {
             mediaPlayer.stop();
-             final HashMap<String,Object> callingPickMap=new HashMap<>();
-             callingPickMap.put("picked","picked");
+            final HashMap<String,Object> callingPickMap=new HashMap<>();
+            callingPickMap.put("picked","picked");
 
-             userRef.child(senderUserId).child("Ringing")
-                     .updateChildren(callingPickMap)
-                     .addOnCompleteListener(task -> {
-                         if(task.isComplete()){
-                             Intent intent=new Intent(calling_activity.this,videoCallActivity.class);
-                             startActivity(intent);
-                         }
-                     });
+            userRef.child(senderUserId).child("Ringing")
+                    .updateChildren(callingPickMap)
+                    .addOnCompleteListener(task -> {
+                        if(task.isComplete()){
+                            Intent intent=new Intent(calling_activity.this,videoCallActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
+                    });
         });
         getAndSetReceiverInformation();
     }
@@ -154,101 +155,15 @@ public class calling_activity extends AppCompatActivity
     {
         userRef.child(senderUserId).child("Calling")
                 .removeValue().addOnCompleteListener(task -> {
-                    if(task.isSuccessful()){
-                        userRef.child(receiverUserId).child("Ringing")
-                                .removeValue().addOnCompleteListener(task1 -> {
-                                    if (task1.isSuccessful())
-                                    {
-                                        startActivity(new Intent(calling_activity.this,MainActivity.class));
-                                        finish();
-                                    }
-                                });
-                    }else {
-                        startActivity(new Intent(calling_activity.this,MainActivity.class));
+            if(task.isSuccessful()) {
+                userRef.child(receiverUserId).child("Ringing")
+                        .removeValue().addOnCompleteListener(task1 -> {
+                    if (task1.isSuccessful()) {
+                        startActivity(new Intent(calling_activity.this, MainActivity.class));
                         finish();
                     }
                 });
-        /*
-        //sender side
-        userRef.child(senderUserId).child("Calling")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot)
-                    {
-                        if(snapshot.exists() && snapshot.hasChild("calling"))
-                        {
-                            callingId=snapshot.child("calling").getValue().toString();
-                            userRef.child(callingId).child("Ringing")
-                                    .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task)
-                                {
-                                    if(task.isSuccessful()){
-                                        userRef.child(senderUserId).child("Calling")
-                                                .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task)
-                                            {
-                                                if(task.isSuccessful()){
-                                                    startActivity(new Intent(calling_activity.this,MainActivity.class));
-                                                    finish();
-                                                }
-                                            }
-                                        });
-                                    }
-                                }
-                            });
-                        }else {
-                            startActivity(new Intent(calling_activity.this,MainActivity.class));
-                            finish();
-                        }
-                    }
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Toast.makeText(calling_activity.this, error.toException().getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-        //Receiver side
-        userRef.child(senderUserId).child("Ringing")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot)
-                    {
-                        if(snapshot.exists() && snapshot.hasChild("ringing"))
-                        {
-                            ringingId=snapshot.child("ringing").getValue().toString();
-                            userRef.child(ringingId).child("Calling")
-                                    .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task)
-                                {
-                                    if(task.isSuccessful()){
-                                        userRef.child(senderUserId).child("Ringing")
-                                                .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task)
-                                            {
-                                                if(task.isSuccessful()){
-                                                    startActivity(new Intent(calling_activity.this,MainActivity.class));
-                                                    finish();
-                                                }
-                                            }
-                                        });
-                                    }
-                                }
-                            });
-                        }else {
-                            startActivity(new Intent(calling_activity.this,MainActivity.class));
-                            finish();
-                        }
-                    }
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Toast.makeText(calling_activity.this, error.toException().getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-         */
+            }
+        });
     }
 }

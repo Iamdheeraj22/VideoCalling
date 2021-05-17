@@ -8,9 +8,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -18,13 +18,11 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -49,6 +47,7 @@ public class ProfileActivity extends AppCompatActivity {
     private static final int IMAGE_REQUEST=1;
     Uri ImageUri;
     String currentUser;
+    Button btn1;
     StorageReference UserProfileRef;
     DatabaseReference databaseReference;
     ProgressDialog progressDialog;
@@ -61,6 +60,7 @@ public class ProfileActivity extends AppCompatActivity {
         text_name=findViewById(R.id.text_name);
         imageView1=findViewById(R.id.imageview1);
         text_email=findViewById(R.id.text_email);
+        btn1=findViewById(R.id.contactUs);
         progressDialog=new ProgressDialog(this);
         databaseReference= FirebaseDatabase.getInstance().getReference().child("Users");
         UserProfileRef= FirebaseStorage.getInstance().getReference().child("Profile Images");
@@ -70,37 +70,37 @@ public class ProfileActivity extends AppCompatActivity {
 
             PopupMenu popupMenu=new PopupMenu(ProfileActivity.this,imageView1);
             popupMenu.getMenuInflater().inflate(R.menu.profile_change,popupMenu.getMenu());
-            popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                @SuppressLint("NonConstantResourceId")
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    int itemId = item.getItemId();
-                    if (itemId == R.id.changeImage) {
-                        final CharSequence[] options = {"Choose from Gallery","Remove Image","Cancel" };
-                        AlertDialog.Builder builder = new AlertDialog.Builder(ProfileActivity.this);
-                        builder.setTitle("Add Photo!");
-                        builder.setItems(options,new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                // TODO Auto-generated method stub
-                                if(options[which].equals("Choose from Gallery")){
-                                    openImage();
-                                }
-                                else if(options[which].equals("Cancel")){
-                                    dialog.dismiss();
-                                }else if(options[which].equals("Remove Image")){
-                                    removeImage();
-                                }
+            popupMenu.setOnMenuItemClickListener(item -> {
+                int itemId = item.getItemId();
+                if (itemId == R.id.changeImage) {
+                    final CharSequence[] options = {"Choose from Gallery","Remove Image","Cancel" };
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ProfileActivity.this);
+                    builder.setTitle("Add Photo!");
+                    builder.setItems(options,new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // TODO Auto-generated method stub
+                            if(options[which].equals("Choose from Gallery")){
+                                openImage();
                             }
-                        });
-                        builder.show();
-                        return true;}
-                    return false;}
-            });
+                            else if(options[which].equals("Cancel")){
+                                dialog.dismiss();
+                            }else if(options[which].equals("Remove Image")){
+                                removeImage();
+                            }
+                        }
+                    });
+                    builder.show();
+                    return true;}
+                return false;});
             popupMenu.show();
         });
         text_bio.setOnClickListener(v -> {
             changeYourBio();
+        });
+        btn1.setOnClickListener(v -> {
+            Intent intent=new Intent(ProfileActivity.this,ContactUs.class);
+            startActivity(intent);
         });
         RetrieveUserData();
     }
@@ -108,12 +108,9 @@ public class ProfileActivity extends AppCompatActivity {
     private void removeImage()
     {
         databaseReference= FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser).child("imageurl");
-        databaseReference.setValue("default").addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if(task.isComplete()){
-                    imageView1.setImageResource(R.drawable.person);
-                }
+        databaseReference.setValue("default").addOnCompleteListener(task -> {
+            if(task.isComplete()){
+                imageView1.setImageResource(R.drawable.person);
             }
         }).addOnFailureListener(e ->
                 Toast.makeText(ProfileActivity.this,
@@ -213,7 +210,7 @@ public class ProfileActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if(snapshot.exists()){
-                            String firstname=snapshot.child("firstname").getValue().toString();
+                            String firstname= snapshot.child("firstname").getValue().toString();
                             String lastname=snapshot.child("lastname").getValue().toString();
                             String image=snapshot.child("imageurl").getValue().toString();
                             String email=snapshot.child("email").getValue().toString();

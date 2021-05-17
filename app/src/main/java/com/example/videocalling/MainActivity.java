@@ -209,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Destroy the app
-   @Override
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         userRef.child(currentUserId).child("status").setValue("Offline")
@@ -429,20 +429,20 @@ public class MainActivity extends AppCompatActivity {
 
     private void clearCallingRinging()
     {
-            userRef.child(currentUserId).child("Ringing").addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()){
-                        userRef.child(currentUserId).child("Ringing").removeValue();
-                    }else{
-                        Toast.makeText(MainActivity.this, "Sorry user have not receive call from anyone..", Toast.LENGTH_SHORT).show();
-                    }
+        userRef.child(currentUserId).child("Ringing").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()){
+                    userRef.child(currentUserId).child("Ringing").removeValue();
+                }else{
+                    Toast.makeText(MainActivity.this, "Sorry user have not receive call from anyone..", Toast.LENGTH_SHORT).show();
                 }
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
 
         userRef.child(currentUserId).child("Calling").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
