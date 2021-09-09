@@ -52,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView myContactsList;
     ActivityMainBinding binding;
     DatabaseReference contactsRef,userRef;
-    SwipeRefreshLayout swipeRefreshLayout;
     FirebaseAuth mAuth;
     String currentUserId;
     String imageUrl="",status="",firstName="",lastName="";
@@ -240,12 +239,10 @@ public class MainActivity extends AppCompatActivity {
         featuresBtn=findViewById(R.id.features_app);
         callHistoryBtn=findViewById(R.id.call_historyBtn);
         exitBtn=findViewById(R.id.exit_app);
-        swipeRefreshLayout=findViewById(R.id.swipeRefreshLayout);
         currentUserName=findViewById(R.id.userId_name);
         isAllFloatingButtonVisible=false;
         callHistoryBtn.hide();
         exitBtn.hide();
-        swipeRefreshLayout.setOnRefreshListener(this::getContacts);
         mAuth=FirebaseAuth.getInstance();
         contactsRef= FirebaseDatabase.getInstance().getReference().child("Contacts");
         userRef=FirebaseDatabase.getInstance().getReference().child("Users");
@@ -292,7 +289,6 @@ public class MainActivity extends AppCompatActivity {
     //Get all Contacts from firebase database
     private void getContacts()
     {
-        swipeRefreshLayout.setRefreshing(true);
         FirebaseRecyclerOptions<Contacts> firebaseRecyclerOptions=
                 new FirebaseRecyclerOptions.Builder<Contacts>()
                         .setQuery(contactsRef.child(currentUserId),Contacts.class)
@@ -303,7 +299,6 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     protected void onBindViewHolder(@NonNull ContactsViewHolder contactsViewHolder, int i, @NonNull Contacts contacts)
                     {
-                        swipeRefreshLayout.setRefreshing(false);
                         final String listUserId= getRef(i).getKey();
                         assert listUserId != null;
                         userRef.child(listUserId).addValueEventListener(new ValueEventListener() {
