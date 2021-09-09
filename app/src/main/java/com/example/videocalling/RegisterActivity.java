@@ -3,6 +3,7 @@ package com.example.videocalling;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -50,6 +51,8 @@ public class RegisterActivity extends AppCompatActivity {
                 Toast.makeText(RegisterActivity.this, "Password atleast 8 digits", Toast.LENGTH_SHORT).show();
             } else if (!confirm_password.equals(create_password)) {
                 Toast.makeText(RegisterActivity.this, "Password doesn't match!", Toast.LENGTH_SHORT).show();
+            } else if(!Patterns.EMAIL_ADDRESS.matcher(txt_email).matches()){
+                email1.setError("Please fill correct email");
             } else {
                 RegisterUser(txt_firstname,txt_lastname, txt_email, confirm_password);
             }
