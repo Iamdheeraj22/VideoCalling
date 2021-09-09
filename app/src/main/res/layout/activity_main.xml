@@ -37,12 +37,6 @@
             tools:ignore="HardcodedText" />
     </LinearLayout>
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:id="@+id/swipeRefreshLayout"
-        android:layout_below="@id/layoutHeader"
-        android:layout_above="@id/nav_view">
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -50,7 +44,6 @@
         android:layout_below="@id/layoutHeader"
         android:layout_above="@+id/nav_view">
     </androidx.recyclerview.widget.RecyclerView>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"
