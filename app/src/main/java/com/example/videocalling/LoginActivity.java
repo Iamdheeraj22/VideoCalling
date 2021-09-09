@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -58,11 +59,16 @@ public class LoginActivity extends AppCompatActivity {
             signInButton.setVisibility(View.INVISIBLE);
             String txt_email=email.getText().toString();
             String txt_password=password.getText().toString();
+
+
             if(TextUtils.isEmpty(txt_email) || TextUtils.isEmpty(txt_password)){
                 Toast.makeText(LoginActivity.this,"Please fill all required field!",Toast.LENGTH_SHORT).show();
                 progressBar.setVisibility(View.INVISIBLE);
                 signInButton.setVisibility(View.VISIBLE);
-            }else
+            } else if(!Patterns.EMAIL_ADDRESS.matcher(txt_email).matches()){
+                email.setError("Please fill correct email");
+            }
+            else
             {
                 progressBar.setVisibility(View.VISIBLE);
                 signInButton.setVisibility(View.INVISIBLE);
